@@ -57,10 +57,7 @@ class FlutterDashboard extends GetResponsiveView<FlutterDashboardController> {
               margin: EdgeInsets.zero,
               child: _FlutterDashboardDrawer(
                 isDesktop: screen.isDesktop,
-                drawerIcon: _DrawerCloseIcon(
-                  options:
-                      FlutterDashboardMaterialApp.of(context)!.drawerOptions,
-                ),
+                drawerIcon: _DrawerCloseIcon(),
               ),
             )
           : null,
@@ -132,7 +129,7 @@ class FlutterDashboard extends GetResponsiveView<FlutterDashboardController> {
               : Get.width - 50,
           child: _FlutterDashboardDrawer(
             isDesktop: screen.isDesktop,
-            drawerIcon: const _DrawerIcon(),
+            drawerIcon: _DrawerIcon(),
           ),
         ),
       ],
@@ -164,7 +161,7 @@ class _DashboardBody extends GetResponsiveView<FlutterDashboardController> {
               mergeActions: screen.isPhone || screen.isWatch,
               drawerIcon:
                   controller.expansionController.value == 0 || !screen.isDesktop
-                      ? const _DrawerIcon()
+                      ? _DrawerIcon()
                       : null,
               innerBoxIsScrolled: innerBoxIsScrolled,
             ),

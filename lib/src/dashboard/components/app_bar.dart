@@ -35,6 +35,10 @@ class AppBarOptions {
 
   final ShapeBorder? shape;
 
+  final double? floatingAppBarHeight;
+
+  final bool? showTitle;
+
   const AppBarOptions({
     this.flexibleSpace,
     this.bottom,
@@ -54,6 +58,8 @@ class AppBarOptions {
     this.elevation,
     this.shape,
     this.radius,
+    this.floatingAppBarHeight,
+    this.showTitle,
   });
 
   AppBarOptions _copyWith(AppBarOptions? other) {
@@ -76,6 +82,7 @@ class AppBarOptions {
       elevation: other?.elevation ?? elevation,
       shape: other?.shape ?? shape,
       radius: other?.radius ?? radius,
+      floatingAppBarHeight: other?.floatingAppBarHeight ?? floatingAppBarHeight,
     );
   }
 
@@ -177,6 +184,7 @@ class _DashboardAppBar extends GetResponsiveView<FlutterDashboardController> {
 
     return Theme(
       data: theme.copyWith(
+        brightness: Theme.of(context).brightness,
         appBarTheme: appBarTheme.copyWith(
           shape: appBar.shape ??
               _dashboard.appBarOptions.theme?.shape ??
@@ -266,8 +274,10 @@ class _DashboardAppBar extends GetResponsiveView<FlutterDashboardController> {
                     appBar.theme?.shadowColor ?? Theme.of(context).shadowColor,
                 bottom: appBar.bottom,
                 primary: appBar.primary ?? true,
-                collapsedHeight: appBar.collapsedHeight,
-                expandedHeight: appBar.expandedHeight,
+                collapsedHeight: appBar.collapsedHeight ??
+                    _dashboard.appBarOptions.collapsedHeight,
+                expandedHeight: appBar.expandedHeight ??
+                    _dashboard.appBarOptions.expandedHeight,
                 floating: appBar.floating ?? false,
                 elevation: (isFloating ? appBar.elevation : null) ??
                     (isFloating ? 10 : 0),
@@ -285,7 +295,10 @@ class _DashboardAppBar extends GetResponsiveView<FlutterDashboardController> {
                   child: Container(
                     constraints: const BoxConstraints(maxWidth: 500),
                     child: selected.search == null
-                        ? (selected.showTitle ?? selected.showTitle!)
+                        ? (selected.appBarOptions?.showTitle ??
+                                selected.appBarOptions?.showTitle! ??
+                                _dashboard.appBarOptions.showTitle ??
+                                true)
                             ? Text(
                                 selected.title,
                                 textScaleFactor: Get.textScaleFactor,
@@ -329,6 +342,9 @@ class _DashboardAppBar extends GetResponsiveView<FlutterDashboardController> {
                   elevation: (isFloating ? appBar.elevation : null) ??
                       (isFloating ? 10 : 0),
                   child: AppBar(
+                    toolbarHeight:
+                        _dashboard.appBarOptions.floatingAppBarHeight ??
+                            kToolbarHeight,
                     actions: [
                       if (mergeActions && actions.length > 1)
                         _MoreMenu(children: actions)
@@ -370,7 +386,10 @@ class _DashboardAppBar extends GetResponsiveView<FlutterDashboardController> {
                       child: Container(
                         constraints: const BoxConstraints(maxWidth: 500),
                         child: selected.search == null
-                            ? (selected.showTitle ?? selected.showTitle!)
+                            ? (selected.appBarOptions?.showTitle ??
+                                    selected.appBarOptions?.showTitle! ??
+                                    _dashboard.appBarOptions.showTitle ??
+                                    true)
                                 ? Text(
                                     selected.title,
                                     textScaleFactor: Get.textScaleFactor,

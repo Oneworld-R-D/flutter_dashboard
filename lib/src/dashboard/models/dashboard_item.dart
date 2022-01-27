@@ -8,7 +8,6 @@ class FlutterDashboardItem {
   final void Function(String? value)? search;
   final AppBarOptions? appBarOptions;
   final List<FlutterDashboardItem> subItems;
-  final bool? showTitle;
   final List<Widget> actions;
   final bool overrideActions;
 
@@ -21,7 +20,6 @@ class FlutterDashboardItem {
     this.search,
     this.overrideActions = false,
     this.actions = const [],
-    this.showTitle = true,
   }) : subItems = [];
 
   FlutterDashboardItem.items({
@@ -33,6 +31,5 @@ class FlutterDashboardItem {
         search = null,
         overrideActions = false,
         actions = const [],
-        showTitle = true,
         page = null;
 }

@@ -45,7 +45,7 @@ class _FlutterDashboardMaterialAppState
     DashboardPages.setRootPages(widget.pages);
     DashboardPages.genarateRoutes(
       widget.dashboardItems,
-      widget.authConfig.overrideLoginView,
+      widget.authConfig.overrideLoginView ?? FlutterDashboardDefaultLoginView(),
     );
     super.initState();
   }
@@ -172,7 +172,7 @@ class _FlutterDashboardMaterialAppState
                       filled: true,
                     ),
           ),
-      themeMode: Get.rootController.themeMode ?? widget.config.themeMode,
+      themeMode: widget.config.themeMode,
       locale: widget.config.locale ?? Get.deviceLocale,
       localizationsDelegates: widget.config.localizationsDelegates,
       localeListResolutionCallback: widget.config.localeListResolutionCallback,

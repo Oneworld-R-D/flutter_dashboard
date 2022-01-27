@@ -41,6 +41,26 @@ class FlutterDashboardController extends GetxController
     }
   }
 
+  void openDrawer() {
+    bool isDrawerOpen =
+        FlutterDashboardController.to.drawerKey.currentState!.isDrawerOpen;
+    if (!isDrawerOpen) {
+      FlutterDashboardController.to.drawerKey.currentState?.openDrawer();
+    } else {
+      Navigator.of(Get.context!).pop();
+    }
+  }
+
+  void closeDrawer() {
+    bool isDrawerOpen =
+        FlutterDashboardController.to.drawerKey.currentState!.isDrawerOpen;
+    if (!isDrawerOpen) {
+      FlutterDashboardController.to.drawerKey.currentState?.openDrawer();
+    } else {
+      Navigator.of(Get.context!).pop();
+    }
+  }
+
   @override
   void onInit() {
     _addRoutes(FlutterDashboardMaterialApp.of(Get.context!)!.dashboardItems);

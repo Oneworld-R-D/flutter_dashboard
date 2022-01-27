@@ -1,8 +1,10 @@
 part of './components.dart';
 
-abstract class _FlutterDashboardContent<T>
+typedef FlutterDashboardContentWidgetBuilder = Widget;
+
+abstract class _FlutterDashboardContentMain<T>
     extends GetResponsiveView<FlutterDashboardController> {
-  _FlutterDashboardContent({
+  _FlutterDashboardContentMain({
     Key? key,
   }) : super(key: key);
 
@@ -61,16 +63,17 @@ abstract class _FlutterDashboardContent<T>
     screen.context = context;
     return super.build(screen.context);
   }
+
+  Color get backgroungColor => Theme.of(screen.context).cardColor;
 }
 
-typedef FlutterDashboardContentWidgetBuilder = Widget;
-
-abstract class FlutterDashboardContentMixin {
+mixin _FlutterDashboardContentMixin {
   FlutterDashboardContentWidgetBuilder? body(BuildContext context);
 }
 
-abstract class FlutterDashboardContent<T> extends _FlutterDashboardContent<T>
-    implements FlutterDashboardContentMixin {
+abstract class FlutterDashboardContent<T>
+    extends _FlutterDashboardContentMain<T>
+    implements _FlutterDashboardContentMixin {
   FlutterDashboardContent({Key? key}) : super(key: key);
 
   @override
@@ -93,6 +96,7 @@ abstract class FlutterDashboardContent<T> extends _FlutterDashboardContent<T>
           borderRadius: BorderRadius.circular(radius(context)),
           elevation: 10,
           clipBehavior: Clip.hardEdge,
+          color: backgroungColor,
           child: body(context) ?? const SizedBox.shrink(),
         ),
       ),

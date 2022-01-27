@@ -14,6 +14,8 @@ enum FlutterDashboardListType {
   Custom,
 }
 
+typedef FlutterDashboardGridDelegate = SliverGridDelegate;
+
 // ignore: must_be_immutable
 class FlutterDashboardListView<T> extends GetResponsiveView<T> {
   bool? isSliverItem;
@@ -29,16 +31,17 @@ class FlutterDashboardListView<T> extends GetResponsiveView<T> {
   bool? shrinkWrap;
   bool? reverse;
   FlutterDashboardListType listType;
-  SliverGridDelegate? gridDelegate;
+  FlutterDashboardGridDelegate? gridDelegate;
 
   FlutterDashboardListView.list({
     Key? key,
     required this.isSliverItem,
     this.items = const [],
-    this.childCount = 0,
+    required this.childCount,
     this.padding,
     required this.buildItem,
     required this.listType,
+    this.dividerBuilder,
   }) : super(key: key) {
     slivers = const [];
     physics = null;
@@ -54,11 +57,10 @@ class FlutterDashboardListView<T> extends GetResponsiveView<T> {
     Key? key,
     required this.isSliverItem,
     this.items = const [],
-    this.childCount = 0,
+    required this.childCount,
     this.padding,
     required this.buildItem,
     required this.listType,
-    required this.dividerBuilder,
     this.physics,
     this.scrollDirection,
     this.shrinkWrap,
@@ -67,6 +69,7 @@ class FlutterDashboardListView<T> extends GetResponsiveView<T> {
   }) : super(key: key) {
     slivers = const [];
     scrollBehavior = null;
+    dividerBuilder = null;
   }
 
   FlutterDashboardListView({

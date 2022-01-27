@@ -21,7 +21,7 @@ class DrawerOptions {
   final Color? unSelectedItemColor;
   final Color? selectedTextColor;
   final bool centerHeaderLogo;
-  final FlutterDashboardDrawerHeader? overrideHeader;
+  final FlutterDashboardDrawerHeaderDelegate? overrideHeader;
   final double? listSpacing;
   final EdgeInsetsGeometry tilePadding;
   final EdgeInsetsGeometry? tileContentPadding;
@@ -48,21 +48,13 @@ class DrawerOptions {
   });
 }
 
-class _DrawerIcon extends StatelessWidget {
-  const _DrawerIcon({Key? key}) : super(key: key);
+class _DrawerIcon extends GetResponsiveWidget<FlutterDashboardController> {
+  _DrawerIcon({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      onPressed: () {
-        bool isDrawerOpen =
-            FlutterDashboardController.to.drawerKey.currentState!.isDrawerOpen;
-        if (!isDrawerOpen) {
-          FlutterDashboardController.to.drawerKey.currentState?.openDrawer();
-        } else {
-          Navigator.of(context).pop();
-        }
-      },
+      onPressed: controller.openDrawer,
       icon: Icon(
         Icons.menu_rounded,
         color: Theme.of(context).iconTheme.color,
@@ -71,27 +63,17 @@ class _DrawerIcon extends StatelessWidget {
   }
 }
 
-class _DrawerCloseIcon extends StatelessWidget {
-  final DrawerOptions options;
-  const _DrawerCloseIcon({
+class _DrawerCloseIcon extends GetResponsiveWidget<FlutterDashboardController> {
+  _DrawerCloseIcon({
     Key? key,
-    required this.options,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      onPressed: () {
-        bool isDrawerOpen =
-            FlutterDashboardController.to.drawerKey.currentState!.isDrawerOpen;
-        if (!isDrawerOpen) {
-          FlutterDashboardController.to.drawerKey.currentState?.openDrawer();
-        } else {
-          Navigator.of(context).pop();
-        }
-      },
+      onPressed: controller.closeDrawer,
       padding: EdgeInsets.zero,
-      icon: options.closeIcon ??
+      icon: FlutterDashboardMaterialApp.of(context)?.drawerOptions.closeIcon ??
           Icon(
             Icons.clear,
             color: Theme.of(context).iconTheme.color,
@@ -100,13 +82,19 @@ class _DrawerCloseIcon extends StatelessWidget {
   }
 }
 
-abstract class FlutterDashboardDrawerHeader
+abstract class FlutterDashboardDrawerUtils {
+  double? height;
+}
+
+class FlutterDashboardDrawerHeaderDelegate
     extends SliverPersistentHeaderDelegate {
   double? height;
 
-  VoidCallback? onBrandLogoPressed;
-
-  String get homeRoute => FlutterDashboardController.to.dashboardInitialRoute;
+  void onBrandLogoPressed() {
+    Get.resetRootNavigator();
+    Get.rootDelegate
+        .toNamed(FlutterDashboardController.to.dashboardInitialRoute);
+  }
 
   @override
   Widget build(
@@ -123,28 +111,23 @@ abstract class FlutterDashboardDrawerHeader
 
   @override
   bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) {
-    return false;
+    return true;
   }
 }
 
-class _DrawerHeader extends FlutterDashboardDrawerHeader {
+class _DrawerHeader extends FlutterDashboardDrawerHeaderDelegate {
   final Widget? logo;
   final Widget? drawerIcon;
-  final double statusBar;
   final bool isDesktop;
 
   _DrawerHeader({
     this.logo,
     this.drawerIcon,
-    required this.statusBar,
     required this.isDesktop,
   });
 
   @override
-  VoidCallback? get onBrandLogoPressed => () {
-        Get.rootDelegate
-            .toNamed(FlutterDashboardController.to.dashboardInitialRoute);
-      };
+  double? get height => super.height;
 
   @override
   Widget build(
@@ -182,11 +165,12 @@ class _DrawerHeader extends FlutterDashboardDrawerHeader {
   }
 }
 
-class _FlutterDashboardDrawer extends StatelessWidget {
+class _FlutterDashboardDrawer
+    extends GetResponsiveWidget<FlutterDashboardController> {
   final bool isDesktop;
   final Widget drawerIcon;
 
-  const _FlutterDashboardDrawer({
+  _FlutterDashboardDrawer({
     Key? key,
     required this.isDesktop,
     required this.drawerIcon,
@@ -211,7 +195,7 @@ class _FlutterDashboardDrawer extends StatelessWidget {
             FlutterDashboardMaterialApp.of(context)!.config.theme != null ||
                     FlutterDashboardMaterialApp.of(context)!.config.darkTheme !=
                         null
-                ? 0
+                ? Theme.of(context).drawerTheme.elevation!
                 : FlutterDashboardMaterialApp.of(context)!.config.enableSpacing
                     ? 20
                     : 10,
@@ -243,7 +227,6 @@ class _FlutterDashboardDrawer extends StatelessWidget {
                 delegate: _dashboardDrawer.overrideHeader ??
                     _DrawerHeader(
                       logo: _brandLogo ?? _dashboardDrawer.logo,
-                      statusBar: Get.mediaQuery.padding.top,
                       drawerIcon: !isDesktop ? drawerIcon : null,
                       isDesktop: isDesktop,
                     ),

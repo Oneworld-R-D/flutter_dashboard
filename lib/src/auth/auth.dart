@@ -7,5 +7,4 @@ import 'package:progress_loading_button/progress_loading_button.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 
 part './components/login.dart';
-part './logics/binding.dart';
 part './logics/login_controller.dart';

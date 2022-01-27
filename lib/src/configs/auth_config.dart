@@ -17,6 +17,7 @@ class FlutterDashboarAuthConfig {
   final bool useUserNameAuth;
   final IconData visiblePasswordIcon;
   final IconData obsecurePasswordIcon;
+  // final Function<LoginController>()? overrideLoginController;
 
   FlutterDashboarAuthConfig({
     this.loginUrl,
@@ -33,6 +34,7 @@ class FlutterDashboarAuthConfig {
     this.useUserNameAuth = false,
     this.visiblePasswordIcon = Icons.visibility,
     this.obsecurePasswordIcon = Icons.visibility_off,
+    // this.overrideLoginController,
   })  : assert(
           overrideLoginFunction == null || loginUrl == null,
           'Can not provide both loginUrl and overrideLoginFunction',

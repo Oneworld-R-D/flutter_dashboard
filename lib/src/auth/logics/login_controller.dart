@@ -39,7 +39,7 @@ class LoginController extends GetxController {
     super.onInit();
   }
 
-  Future<void> loginUser() async {
+  Future<void> handleLogin() async {
     if (loginFom.valid) {
       await authController.login(loginFom.value).then((bool? _isLoginSuccess) {
         if (_isLoginSuccess != null) {

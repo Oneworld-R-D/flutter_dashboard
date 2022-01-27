@@ -26,7 +26,7 @@ class DashboardPages {
   }
 
   static void genarateRoutes(List<FlutterDashboardItem> dashboardItems,
-      FlutterDashboardLoginView? loginView) {
+      FlutterDashboardLoginView loginView) {
     final List<GetPage> _allPages = [
       for (var item in dashboardItems) ..._pages(item),
     ];
@@ -58,8 +58,10 @@ class DashboardPages {
             GetPage(
               preventDuplicates: true,
               name: _Paths.LOGIN,
-              page: () => loginView ?? FlutterDashboardDefaultLoginView(),
-              binding: LoginBinding(),
+              page: () => loginView,
+              binding: BindingsBuilder(() {
+                Get.lazyPut<LoginController>(() => LoginController());
+              }),
               middlewares: [
                 FlutterDashboardEnsureNotAuthenticated(),
               ],

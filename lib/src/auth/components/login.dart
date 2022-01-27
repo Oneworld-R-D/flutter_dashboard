@@ -6,10 +6,8 @@ abstract class FlutterDashboardLoginView
     Key? key,
   }) : super(key: key);
 
-  FlutterDashboardMaterialApp get _dashboard =>
+  FlutterDashboardMaterialApp get dashboard =>
       FlutterDashboardMaterialApp.of(screen.context)!;
-
-  FormGroup get loginForm => controller.loginFom;
 
   Widget buildSubmitButton(
     BuildContext context,
@@ -21,7 +19,7 @@ abstract class FlutterDashboardLoginView
           onPressed: () async {
             _isProcessing(true);
             await controller
-                .loginUser()
+                .handleLogin()
                 .whenComplete(() => _isProcessing(false));
           },
           defaultWidget: Text(
@@ -71,12 +69,94 @@ abstract class FlutterDashboardLoginView
     ];
   }
 
+  FormGroup get loginForm => controller.loginFom;
+
+  List<Widget> buildFormFields(FormGroup _form) {
+    return [
+      if (screen.isDesktop) const Spacer(),
+      ...buildSimpleContent(),
+      Divider(
+        color: Colors.transparent,
+        height: screen.isDesktop ? 100 : 50,
+      ),
+      ...buildForm(_form),
+      const Divider(
+        color: Colors.transparent,
+        height: 80,
+      ),
+      buildSubmitButton(screen.context),
+      if (screen.isDesktop) const Spacer(),
+    ];
+  }
+
+  Widget emailField(FormGroup _form) {
+    return ReactiveTextField(
+      formControlName: 'email',
+      validationMessages: (control) => {
+        ValidationMessage.required: 'Email can not be empty'.tr,
+        ValidationMessage.email: 'Must be a valid email'.tr,
+      },
+      onEditingComplete: () => _form.focus('password'),
+      decoration: dashboard.authConfig.emailInputDecoration ??
+          InputDecoration(
+            label: const Text('Email'),
+            hintText:
+                'example@${dashboard.title.split(" ").first.toLowerCase()}.com',
+          ),
+    );
+  }
+
+  Widget userNameField(FormGroup _form) {
+    return ReactiveTextField(
+      formControlName: 'username',
+      onEditingComplete: () => _form.focus('password'),
+      validationMessages: (control) => {
+        ValidationMessage.required: 'Username can not be empty'.tr,
+      },
+      decoration: dashboard.authConfig.emailInputDecoration ??
+          const InputDecoration(
+            label: Text('Username'),
+            hintText: 'Enter your username',
+          ),
+    );
+  }
+
+  Widget passwordField(FormGroup _form) {
+    return Obx(
+      () => ReactiveTextField(
+        formControlName: 'password',
+        obscureText: !controller.isPasswordVisible.value,
+        onEditingComplete: () => _form.unfocus(),
+        validationMessages: (control) => {
+          ValidationMessage.required: 'The password must not be empty'.tr,
+          ValidationMessage.minLength:
+              'The password must be at least 6 characters'.tr,
+          ValidationMessage.pattern: 'Passowrd should be alphanumeric'.tr
+        },
+        decoration: dashboard.authConfig.passwordInputDecoration ??
+            InputDecoration(
+              label: const Text('Password'),
+              hintText: 'Enter your password',
+              suffixIcon: IconButton(
+                onPressed: controller.isPasswordVisible.toggle,
+                icon: Icon(
+                  controller.isPasswordVisible.value
+                      ? dashboard.authConfig.obsecurePasswordIcon
+                      : dashboard.authConfig.visiblePasswordIcon,
+                  color: Theme.of(screen.context).disabledColor,
+                ),
+              ),
+            ),
+      ),
+    );
+  }
+
   List<Widget> buildForm(
     FormGroup _form,
   ) {
     return [
-      if (!_dashboard.authConfig.useUserNameAuth) emailField(_form),
-      if (_dashboard.authConfig.useUserNameAuth) userNameField(_form),
+      if (!dashboard.authConfig.useUserNameAuth) emailField(_form),
+      if (dashboard.authConfig.useUserNameAuth) userNameField(_form),
       const Divider(
         color: Colors.transparent,
         height: 30,
@@ -90,23 +170,23 @@ abstract class FlutterDashboardLoginView
     return Theme(
       data: Theme.of(context).copyWith(
         inputDecorationTheme: InputDecorationTheme(
-          filled: _dashboard.authConfig.inputDecorationTheme?.filled ?? false,
-          hintStyle: _dashboard.authConfig.inputDecorationTheme?.hintStyle,
-          border: _dashboard.authConfig.inputDecorationTheme?.border ??
+          filled: dashboard.authConfig.inputDecorationTheme?.filled ?? false,
+          hintStyle: dashboard.authConfig.inputDecorationTheme?.hintStyle,
+          border: dashboard.authConfig.inputDecorationTheme?.border ??
               OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.0),
                 borderSide: BorderSide(
                   color: Theme.of(context).dividerColor.withOpacity(0.1),
                 ),
               ),
-          enabledBorder: _dashboard.authConfig.inputDecorationTheme?.border ??
+          enabledBorder: dashboard.authConfig.inputDecorationTheme?.border ??
               OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.0),
                 borderSide: BorderSide(
                   color: Theme.of(context).dividerColor.withOpacity(0.1),
                 ),
               ),
-          focusedBorder: _dashboard.authConfig.inputDecorationTheme?.border ??
+          focusedBorder: dashboard.authConfig.inputDecorationTheme?.border ??
               OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.0),
                 borderSide: BorderSide(
@@ -114,21 +194,21 @@ abstract class FlutterDashboardLoginView
                 ),
               ),
           focusedErrorBorder:
-              _dashboard.authConfig.inputDecorationTheme?.border ??
+              dashboard.authConfig.inputDecorationTheme?.border ??
                   OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
                     borderSide: BorderSide(
                       color: Theme.of(context).dividerColor.withOpacity(0.1),
                     ),
                   ),
-          disabledBorder: _dashboard.authConfig.inputDecorationTheme?.border ??
+          disabledBorder: dashboard.authConfig.inputDecorationTheme?.border ??
               OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10.0),
                 borderSide: BorderSide(
                   color: Theme.of(context).dividerColor.withOpacity(0.1),
                 ),
               ),
-          errorBorder: (_dashboard.authConfig.inputDecorationTheme?.border ??
+          errorBorder: (dashboard.authConfig.inputDecorationTheme?.border ??
                   OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10.0),
                     borderSide: BorderSide(
@@ -150,84 +230,8 @@ abstract class FlutterDashboardLoginView
           mainAxisAlignment:
               isDesktop ? MainAxisAlignment.start : MainAxisAlignment.center,
           mainAxisSize: MainAxisSize.min,
-          children: [
-            if (isDesktop) const Spacer(),
-            ...buildSimpleContent(),
-            Divider(
-              color: Colors.transparent,
-              height: isDesktop ? 100 : 50,
-            ),
-            ...buildForm(form),
-            const Divider(
-              color: Colors.transparent,
-              height: 80,
-            ),
-            buildSubmitButton(context),
-            if (isDesktop) const Spacer(),
-          ],
+          children: buildFormFields(form),
         ),
-      ),
-    );
-  }
-
-  Widget emailField(FormGroup _form) {
-    return ReactiveTextField(
-      formControlName: 'email',
-      validationMessages: (control) => {
-        ValidationMessage.required: 'Email can not be empty'.tr,
-        ValidationMessage.email: 'Must be a valid email'.tr,
-      },
-      onEditingComplete: () => _form.focus('password'),
-      decoration: _dashboard.authConfig.emailInputDecoration ??
-          InputDecoration(
-            label: const Text('Email'),
-            hintText:
-                'example@${_dashboard.title.split(" ").first.toLowerCase()}.com',
-          ),
-    );
-  }
-
-  Widget userNameField(FormGroup _form) {
-    return ReactiveTextField(
-      formControlName: 'username',
-      onEditingComplete: () => _form.focus('password'),
-      validationMessages: (control) => {
-        ValidationMessage.required: 'Username can not be empty'.tr,
-      },
-      decoration: _dashboard.authConfig.emailInputDecoration ??
-          const InputDecoration(
-            label: Text('Username'),
-            hintText: 'Enter your username',
-          ),
-    );
-  }
-
-  Widget passwordField(FormGroup _form) {
-    return Obx(
-      () => ReactiveTextField(
-        formControlName: 'password',
-        obscureText: !controller.isPasswordVisible.value,
-        onEditingComplete: () => _form.unfocus(),
-        validationMessages: (control) => {
-          ValidationMessage.required: 'The password must not be empty'.tr,
-          ValidationMessage.minLength:
-              'The password must be at least 6 characters'.tr,
-          ValidationMessage.pattern: 'Passowrd should be alphanumeric'.tr
-        },
-        decoration: _dashboard.authConfig.passwordInputDecoration ??
-            InputDecoration(
-              label: const Text('Password'),
-              hintText: 'Enter your password',
-              suffixIcon: IconButton(
-                onPressed: controller.isPasswordVisible.toggle,
-                icon: Icon(
-                  controller.isPasswordVisible.value
-                      ? _dashboard.authConfig.obsecurePasswordIcon
-                      : _dashboard.authConfig.visiblePasswordIcon,
-                  color: Theme.of(screen.context).disabledColor,
-                ),
-              ),
-            ),
       ),
     );
   }
@@ -235,13 +239,13 @@ abstract class FlutterDashboardLoginView
   Widget buildBrandLogo(bool isDesktop) {
     return Center(
       child: SizedBox.square(
-        dimension: _dashboard.authConfig.logoSize ??
+        dimension: dashboard.authConfig.logoSize ??
             (isDesktop
                 ? screen.width <= 1920
                     ? Get.width * 0.3
                     : 580
                 : 250),
-        child: _dashboard.config.brandLogo,
+        child: dashboard.config.brandLogo,
       ),
     );
   }
@@ -322,10 +326,32 @@ abstract class FlutterDashboardLoginView
     );
   }
 
+  Widget buildBody(
+      {FormGroup? customLoginForm,
+      Widget Function(BuildContext, FormGroup, Widget?)? builder}) {
+    return ReactiveFormBuilder(
+      form: () => customLoginForm ?? loginForm,
+      builder: builder ??
+          (BuildContext context, FormGroup _form, Widget? child) {
+            return screen.isDesktop
+                ? buildDesktopView(
+                    context,
+                    form: _form,
+                  )
+                : buildDefaultView(
+                    context,
+                    form: _form,
+                  );
+          },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     screen.context = context;
-    return FlutterDashboardDefaultLoginView();
+    return Scaffold(
+      body: buildBody(),
+    );
   }
 }
 
@@ -334,22 +360,6 @@ class FlutterDashboardDefaultLoginView extends FlutterDashboardLoginView {
 
   @override
   Widget build(BuildContext context) {
-    screen.context = context;
-    return Scaffold(
-      body: ReactiveFormBuilder(
-        form: () => loginForm,
-        builder: (BuildContext context, FormGroup _form, Widget? child) {
-          return screen.isDesktop
-              ? buildDesktopView(
-                  context,
-                  form: _form,
-                )
-              : buildDefaultView(
-                  context,
-                  form: _form,
-                );
-        },
-      ),
-    );
+    return super.build(context);
   }
 }
