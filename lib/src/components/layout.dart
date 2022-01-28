@@ -4,14 +4,16 @@ const EdgeInsetsGeometry kDashboardAppbarPadding =
     EdgeInsets.only(bottom: kToolbarHeight - 45 //(56 - 45 = 11),
         );
 
-const EdgeInsetsGeometry kDashboardContentPadding = EdgeInsets.symmetric(
-  horizontal: 10,
-  vertical: kToolbarHeight - 50, //(56 - 50 = 6)
+const EdgeInsetsGeometry kDashboardContentPadding = EdgeInsets.only(
+  left: 20,
+  right: 20,
+  top: kToolbarHeight - 40,
+  bottom: 20, //(56 - 50 = 6)
 );
 
 const double kDefaultRadius = 10;
 
-const double kDefaultElevation = 10;
+const double kDefaultElevation = 5;
 
 class FlutterDashboardRootView
     extends GetResponsiveView<FlutterDashboardController> {
@@ -51,36 +53,38 @@ class FlutterDashboardRootView
 
   Widget _buildBody(BuildContext context) {
     screen.context = context;
+    if (screen.isDesktop) {
+      controller.isDrawerOpen(false);
+    }
+
     return Scaffold(
       key: controller.drawerKey,
-      drawer: !screen.isDesktop
-          ? Card(
-              elevation: Theme.of(context).drawerTheme.elevation,
-              shape: screen.isDesktop
-                  ? Theme.of(context).drawerTheme.shape
-                  : const RoundedRectangleBorder(),
-              clipBehavior: Clip.antiAliasWithSaveLayer,
-              margin: EdgeInsets.zero,
-              child: _FlutterDashboardDrawer(
-                drawerIcon: _DrawerIcon(
-                  expansion: controller.expansionController,
-                ),
-                expansiocController: controller.expansionController,
-              ),
-            )
-          : null,
-      body: screen.isDesktop
-          ? Padding(
-              padding: dashboard.config.enableSpacing
-                  ? const EdgeInsets.all(16.0)
-                  : EdgeInsets.zero,
-              child: _buildDesktopView(
-                context,
-                title: controller.currentPageTitle.value,
-                delegate: controller.delegate ?? Get.rootDelegate,
-              ),
-            )
-          : _DashboardBody(),
+      drawer: screen.isDesktop
+          ? null
+          : _FlutterDashboardDrawer(
+              expansiocController: controller.expansionController,
+              drawerIcon: _DrawerIcon(),
+            ),
+      onDrawerChanged: (isOpened) {
+        print(isOpened);
+        controller.isDrawerOpen(isOpened);
+      },
+      body: Builder(builder: (_) {
+        if (screen.isDesktop) {
+          return Padding(
+            padding: dashboard.config.enableSpacing
+                ? const EdgeInsets.all(16.0)
+                : EdgeInsets.zero,
+            child: _buildDesktopView(
+              context,
+              title: controller.currentPageTitle.value,
+              delegate: controller.delegate ?? Get.rootDelegate,
+            ),
+          );
+        } else {
+          return _DashboardBody();
+        }
+      }),
     );
   }
 
@@ -97,7 +101,12 @@ class FlutterDashboardRootView
           bottom: 0,
           start: 304,
           end: 0,
-          child: _DashboardBody(),
+          child: Padding(
+            padding: dashboard.config.enableBodySpacing
+                ? dashboard.config.dashboardContentPadding
+                : EdgeInsets.zero,
+            child: _DashboardBody(),
+          ),
         ),
         PositionedDirectional(
           top: 0,
@@ -106,6 +115,7 @@ class FlutterDashboardRootView
           end: controller.expansionController.value == 1
               ? Get.width - 304
               : Get.width - 50,
+          // end: Get.width - 304,
           child: _FlutterDashboardDrawer(
             expansiocController: controller.expansionController,
             drawerIcon: null,
@@ -130,7 +140,8 @@ class _DashboardBody extends GetResponsiveView<FlutterDashboardController> {
           ? const ClampingScrollPhysics()
           : const NeverScrollableScrollPhysics(),
       body: Material(
-        shape: _dashboard.config.enableSpacing
+        shape: _dashboard.config.enableSpacing ||
+                _dashboard.config.enableBodySpacing
             ? screen.isDesktop
                 ? _dashboard.config.dashboardContentShape ??
                     Theme.of(context).drawerTheme.shape ??
@@ -146,7 +157,9 @@ class _DashboardBody extends GetResponsiveView<FlutterDashboardController> {
                 ? Theme.of(context).scaffoldBackgroundColor
                 : Theme.of(context).cardColor,
         shadowColor: Theme.of(context).shadowColor,
-        elevation: Theme.of(context).drawerTheme.elevation ?? kDefaultElevation,
+        elevation: screen.isDesktop
+            ? Theme.of(context).drawerTheme.elevation ?? kDefaultElevation
+            : 0,
         child: GetRouterOutlet(
           initialRoute: controller.dashboardInitialRoute,
           anchorRoute: DashboardRoutes.DASHBOARD,
@@ -162,9 +175,7 @@ class _DashboardBody extends GetResponsiveView<FlutterDashboardController> {
               mergeActions: screen.isPhone || screen.isWatch,
               drawerIcon:
                   controller.expansionController.value == 0 || !screen.isDesktop
-                      ? _DrawerIcon(
-                          expansion: controller.expansionController,
-                        )
+                      ? _DrawerIcon()
                       : null,
               innerBoxIsScrolled: innerBoxIsScrolled,
             ),
