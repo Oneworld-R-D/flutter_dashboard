@@ -11,6 +11,8 @@ const EdgeInsetsGeometry kDashboardContentPadding = EdgeInsets.symmetric(
 
 const double kDefaultRadius = 10;
 
+const double kDefaultElevation = 10;
+
 class FlutterDashboardRootView
     extends GetResponsiveView<FlutterDashboardController> {
   FlutterDashboardRootView({Key? key}) : super(key: key);
@@ -51,7 +53,7 @@ class FlutterDashboardRootView
     screen.context = context;
     return Scaffold(
       key: controller.drawerKey,
-      drawer: screen.isPhone
+      drawer: !screen.isDesktop
           ? Card(
               elevation: Theme.of(context).drawerTheme.elevation,
               shape: screen.isDesktop
@@ -139,9 +141,12 @@ class _DashboardBody extends GetResponsiveView<FlutterDashboardController> {
                 : const RoundedRectangleBorder()
             : const RoundedRectangleBorder(),
         clipBehavior: Clip.antiAliasWithSaveLayer,
-        color: Theme.of(context).scaffoldBackgroundColor,
+        color:
+            _dashboard.config.theme != null || _dashboard.config.theme != null
+                ? Theme.of(context).scaffoldBackgroundColor
+                : Theme.of(context).cardColor,
         shadowColor: Theme.of(context).shadowColor,
-        elevation: 10,
+        elevation: Theme.of(context).drawerTheme.elevation ?? kDefaultElevation,
         child: GetRouterOutlet(
           initialRoute: controller.dashboardInitialRoute,
           anchorRoute: DashboardRoutes.DASHBOARD,

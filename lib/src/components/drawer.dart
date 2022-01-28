@@ -194,10 +194,8 @@ class _FlutterDashboardDrawer
                 (Get.isDarkMode
                     ? _dashboard.config.darkTheme?.drawerTheme.elevation
                     : _dashboard.config.theme?.drawerTheme.elevation) ??
-                10
-            : _dashboard.config.enableSpacing
-                ? 20
-                : 10,
+                kDefaultElevation
+            : kDefaultElevation,
         shape: _dashboard.config.enableSpacing
             ? screen.isDesktop
                 ? Theme.of(context).drawerTheme.shape ??
@@ -217,10 +215,8 @@ class _FlutterDashboardDrawer
                   (Get.isDarkMode
                       ? _dashboard.config.darkTheme?.drawerTheme.elevation
                       : _dashboard.config.theme?.drawerTheme.elevation) ??
-                  10
-              : _dashboard.config.enableSpacing
-                  ? 20
-                  : 10,
+                  kDefaultElevation
+              : kDefaultElevation,
           shape: _dashboard.config.enableSpacing
               ? screen.isDesktop
                   ? Theme.of(context).drawerTheme.shape
@@ -421,6 +417,8 @@ class _DrawerList extends GetResponsiveView<FlutterDashboardController> {
                 .color,
           ),
           dividerColor: Colors.transparent,
+          shadowColor: _dashboard.appBarOptions.theme?.shadowColor ??
+              Theme.of(screen.context).shadowColor,
         ),
         child: item.subItems.isNotEmpty
             ? ExpansionTile(
@@ -467,16 +465,8 @@ class _DrawerList extends GetResponsiveView<FlutterDashboardController> {
                     Theme.of(screen.context).indicatorColor,
                 textColor: _dashboard.drawerOptions.selectedItemColor ??
                     Theme.of(screen.context).indicatorColor,
-                backgroundColor: item == selectedItem || item == selectedItem
-                    ? (_dashboard.drawerOptions.selectedItemColor ??
-                        Theme.of(screen.context).drawerTheme.backgroundColor)
-                    : ((_dashboard.drawerOptions.unSelectedItemColor ==
-                                Colors.transparent
-                            ? Theme.of(screen.context)
-                                .drawerTheme
-                                .backgroundColor
-                            : _dashboard.drawerOptions.unSelectedItemColor) ??
-                        Theme.of(screen.context).drawerTheme.backgroundColor),
+                backgroundColor: _dashboard.drawerOptions.selectedItemColor ??
+                    Theme.of(screen.context).listTileTheme.tileColor,
                 children: [
                   for (var subItem in item.subItems)
                     _buildList(

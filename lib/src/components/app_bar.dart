@@ -199,7 +199,8 @@ class _DashboardAppBar extends GetResponsiveView<FlutterDashboardController> {
           elevation: appBar.theme?.elevation ??
               _dashboard.appBarOptions.theme?.elevation ??
               _dashboard.appBarOptions.theme?.elevation ??
-              10,
+              Theme.of(context).drawerTheme.elevation ??
+              kDefaultElevation,
           actionsIconTheme: appBar.theme?.actionsIconTheme ??
               appBar.theme?.actionsIconTheme ??
               _dashboard.appBarOptions.theme?.actionsIconTheme ??

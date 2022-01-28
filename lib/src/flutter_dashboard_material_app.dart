@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dashboard/flutter_dashboard.dart';
 import 'package:flutter_dashboard/src/components/components.dart';
 import 'package:flutter_dashboard/src/configs/configs.dart';
 import 'package:flutter_dashboard/src/navigation/flutter_dashboard_navigation.dart';
@@ -66,8 +67,6 @@ class _FlutterDashboardMaterialAppState<T>
       transitionDuration: Get.defaultTransitionDuration,
       defaultTransition: Transition.leftToRightWithFade,
       customTransition: Get.customTransition,
-      theme: widget.config.theme,
-      darkTheme: widget.config.darkTheme,
       themeMode: widget.config.themeMode,
       locale: widget.config.locale ?? Get.deviceLocale,
       localizationsDelegates: widget.config.localizationsDelegates,
