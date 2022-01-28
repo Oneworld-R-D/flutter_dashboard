@@ -44,41 +44,55 @@ class DrawerOptions {
 typedef DrawerSliverPersistentHeaderDelegate = SliverPersistentHeaderDelegate;
 
 class _DrawerIcon extends GetResponsiveView<FlutterDashboardController> {
-  final AnimationController expansion;
-  _DrawerIcon({Key? key, required this.expansion}) : super(key: key);
+  _DrawerIcon({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     screen.context = context;
-    bool hasDrawer = Scaffold.maybeOf(screen.context)?.hasDrawer == true;
+    bool hasDrawer = controller.drawerKey.currentState?.hasDrawer == true;
 
-    return IconButton(
-      onPressed: () {
-        if (hasDrawer) {
-          var isDrawerOpen = Scaffold.of(screen.context).isDrawerOpen;
-          if (!isDrawerOpen) {
-            expansion.animateTo(0.0);
-            controller.drawerKey.currentState?.openDrawer();
-          } else {
-            expansion.animateTo(1.0);
-            Navigator.of(context).pop();
-          }
-        } else {
-          if (expansion.value == 0 || expansion.value == 1) {
-            if (expansion.value == 0) {
-              expansion.animateTo(1.0);
+    return Obx(
+      () => IconButton(
+        onPressed: () {
+          if (FlutterDashboardMaterialApp.of(context)
+                  .drawerOptions
+                  .overrideHeader ==
+              null) {
+            if (hasDrawer) {
+              if (!controller.isDrawerOpen.value) {
+                controller.drawerKey.currentState?.openDrawer();
+              } else {
+                Navigator.of(context).pop();
+              }
             } else {
-              expansion.animateTo(0.0);
+              if (controller.expansionController.value == 0 ||
+                  controller.expansionController.value == 1) {
+                if (controller.expansionController.value == 0) {
+                  controller.expansionController.animateTo(1.0);
+                } else {
+                  controller.expansionController.animateTo(0.0);
+                }
+              }
+            }
+          } else {
+            if (hasDrawer) {
+              var isDrawerOpen = Scaffold.of(screen.context).isDrawerOpen;
+              if (!isDrawerOpen) {
+                controller.drawerKey.currentState?.openDrawer();
+              } else {
+                Navigator.of(context).pop();
+              }
             }
           }
-        }
-      },
-      padding: EdgeInsets.zero,
-      icon: AnimatedIcon(
-        icon: AnimatedIcons.close_menu,
-        progress:
-            Tween(begin: !hasDrawer ? 1.0 : 0.0, end: !hasDrawer ? 0.0 : 1.0)
-                .animate(expansion),
+        },
+        padding: EdgeInsets.zero,
+        icon: AnimatedIcon(
+          icon: AnimatedIcons.close_menu,
+          progress: Tween(
+                  begin: controller.isDrawerOpen.value ? 1.0 : 0.0,
+                  end: controller.isDrawerOpen.value ? 0.0 : 1.0)
+              .animate(controller.expansionController),
+        ),
       ),
     );
   }

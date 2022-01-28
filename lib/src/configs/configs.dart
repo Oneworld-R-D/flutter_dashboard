@@ -67,9 +67,10 @@ class DashboardConfig {
   final Iterable<Locale> supportedLocales;
   final TextDirection? textDirection;
   final Translations? translations;
-  // final EdgeInsetsGeometry? dashboardContentPadding;
+  final bool enableBodySpacing;
+  final EdgeInsetsGeometry dashboardContentPadding;
   final ShapeBorder? dashboardContentShape;
-  // final EdgeInsetsGeometry? dashboardAppbarPadding;
+  final EdgeInsetsGeometry? dashboardAppbarPadding;
   final double radius;
 
   const DashboardConfig({
@@ -92,6 +93,8 @@ class DashboardConfig {
     this.textDirection,
     this.translations,
     this.radius = kDefaultRadius,
-    // this.dashboardAppbarPadding = kDashboardAppbarPadding,
+    this.dashboardAppbarPadding = kDashboardAppbarPadding,
+    this.dashboardContentPadding = kDashboardContentPadding,
+    this.enableBodySpacing = false,
   });
 }

@@ -9,7 +9,7 @@ class FlutterDashboardController extends GetxController
 
   final RxString currentRoute = ''.obs, currentPageTitle = ''.obs;
 
-  final RxBool isScreenLoading = false.obs;
+  final RxBool isScreenLoading = false.obs, isDrawerOpen = false.obs;
 
   late AnimationController expansionController;
   late FocusNode focusNode;
