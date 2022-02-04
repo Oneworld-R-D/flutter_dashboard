@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dashboard/src/components/components.dart';
-import 'package:flutter_dashboard/src/configs/configs.dart';
-import 'package:flutter_dashboard/src/navigation/flutter_dashboard_navigation.dart';
-import 'package:get/get.dart';
+import 'package:flutter_dashboard/flutter_dashboard.dart';
 
 class FlutterDashboardMaterialApp<T> extends StatefulWidget {
   final String title;
@@ -11,11 +8,17 @@ class FlutterDashboardMaterialApp<T> extends StatefulWidget {
   final DrawerOptions drawerOptions;
   final AppBarOptions appBarOptions;
   final List<T>? rootControllers;
-  final FlutterDashboarAuthConfig authConfig;
   final List<Widget> overrideActions;
   final List<GetPage> rootPages;
   final List<NavigatorObserver>? navigatorObservers;
   final Widget Function(BuildContext, Widget?)? builder;
+  final List<GetMiddleware>? dashboardMiddlewares;
+  final Widget notFoundPage;
+  final Widget Function(
+    BuildContext context,
+    GetDelegate delegate,
+    GetNavConfig? currentRoute,
+  )? overrideRootPage;
 
   FlutterDashboardMaterialApp({
     Key? key,
@@ -27,9 +30,17 @@ class FlutterDashboardMaterialApp<T> extends StatefulWidget {
     this.builder,
     required this.dashboardItems,
     this.appBarOptions = const AppBarOptions(),
-    this.authConfig = const FlutterDashboarAuthConfig(),
     this.config = const DashboardConfig(),
     this.drawerOptions = const DrawerOptions(),
+    this.dashboardMiddlewares,
+    this.overrideRootPage,
+    this.notFoundPage = const Scaffold(
+      body: Center(
+        child: Text(
+          '404 Page Not Found.',
+        ),
+      ),
+    ),
   })  : assert(
           dashboardItems.isNotEmpty,
         ),
@@ -51,6 +62,9 @@ class _FlutterDashboardMaterialAppState<T>
     DashboardPages.setRootPages(widget.rootPages);
     DashboardPages.genarateRoutes(
       widget.dashboardItems,
+      widget.drawerOptions.footerNavItems,
+      widget.dashboardMiddlewares,
+      widget.overrideRootPage,
     );
     super.initState();
   }
@@ -80,9 +94,15 @@ class _FlutterDashboardMaterialAppState<T>
       translationsKeys: widget.config.translations?.keys ?? Get.translations,
       builder: widget.builder,
       navigatorObservers: widget.navigatorObservers,
+      unknownRoute: DashboardPages.unknownPage,
       initialBinding: BindingsBuilder(
         () {
-          // Get.put(FlutterDashboardAuthService(), permanent: true);
+          Get.put(
+              FlutterDashboardNavService(
+                navItems: widget.dashboardItems,
+                navFooterItems: widget.drawerOptions.footerNavItems,
+              ),
+              permanent: true);
           if ((widget.rootControllers ?? []).isNotEmpty) {
             for (var _controller in (widget.rootControllers ?? [])) {
               _controller;

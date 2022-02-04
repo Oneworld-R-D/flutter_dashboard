@@ -7,10 +7,13 @@ export 'package:get_storage/get_storage.dart';
 export 'package:reactive_forms/reactive_forms.dart';
 export 'package:get/get.dart';
 export 'package:google_fonts/google_fonts.dart';
+export 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
+export './src/widgets/list/flutter_dashboard_list.dart';
+export './src/widgets/animated_items/animated_item.dart';
 export './src/components/components.dart';
 export './src/configs/configs.dart';
 export './src/controllers/controllers.dart';
 export './src/navigation/flutter_dashboard_navigation.dart';
+export './src/services/services.dart';
 export './src/flutter_dashboard_material_app.dart';
-export './src/auth/auth.dart';

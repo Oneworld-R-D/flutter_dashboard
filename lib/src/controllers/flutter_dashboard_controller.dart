@@ -5,11 +5,13 @@ class FlutterDashboardController extends GetxController
   static FlutterDashboardController get to =>
       Get.find<FlutterDashboardController>();
 
+  final FlutterDashboardNavService _navService = FlutterDashboardNavService.to;
+
   GetDelegate? delegate;
 
   final RxString currentRoute = ''.obs, currentPageTitle = ''.obs;
 
-  final RxBool isScreenLoading = false.obs;
+  final RxBool isScreenLoading = false.obs, isDrawerOpen = false.obs;
 
   late AnimationController expansionController;
   late FocusNode focusNode;
@@ -19,25 +21,41 @@ class FlutterDashboardController extends GetxController
   String dashboardInitialRoute =
       "${DashboardRoutes.DASHBOARD}${FlutterDashboardMaterialApp.of(Get.context!).dashboardItems[0].page!.name}";
 
-  final Map<String, FlutterDashboardItem> _finalRoutes = {};
+  final RxMap<String, FlutterDashboardItem> finalRoutes =
+      RxMap<String, FlutterDashboardItem>();
 
   FlutterDashboardItem get selectedDrawerItem {
-    return _finalRoutes[currentPageTitle.value]!;
+    if (finalRoutes.containsKey(currentPageTitle.value)) {
+      return finalRoutes[currentPageTitle.value]!;
+    } else {
+      return _navService.rawRoutes.first;
+    }
   }
 
   void _addRoutes(List<FlutterDashboardItem> _items) {
     for (var item in _items) {
       if (item.subItems.isEmpty) {
-        _finalRoutes[item.title] = item;
+        finalRoutes[item.title] = item;
       } else {
         _addRoutes(item.subItems);
       }
     }
   }
 
+  List<FlutterDashboardItem> expandItems(List<FlutterDashboardItem> items) {
+    return items
+        .expand((FlutterDashboardItem element) => element.subItems.isEmpty
+            ? [element]
+            : expandItems(element.subItems))
+        .toList();
+  }
+
   @override
   void onInit() {
-    _addRoutes(FlutterDashboardMaterialApp.of(Get.context!).dashboardItems);
+    _addRoutes(_navService.finalRoutes);
+    _addRoutes(_navService.rawFooterRoutes);
+    isScreenLoading(true);
+
     focusNode = FocusNode();
     expansionController = AnimationController(
       vsync: this,
@@ -46,24 +64,42 @@ class FlutterDashboardController extends GetxController
     );
 
     ever(currentRoute, (String location) {
-      if (location == '/' ||
-          location == '/dashboard' ||
-          location == '/dashboard/') {
-        currentPageTitle(_finalRoutes.keys.toList()[0]);
+      String _location = location.split('/').last.toLowerCase();
+
+      if (_location.isEmpty || _location == 'dashboard') {
+        currentPageTitle(_navService.rawRoutes.first.title);
       } else {
-        if (_finalRoutes.values
-            .map((FlutterDashboardItem e) => (location)
-                .startsWith('${DashboardRoutes.DASHBOARD}${e.page!.name}'))
+        if (finalRoutes.entries
+            .map((element) =>
+                _location == element.value.page?.name.split('/').last)
             .isNotEmpty) {
-          currentPageTitle(_finalRoutes.values
-              .singleWhere((FlutterDashboardItem e) => (location)
-                  .startsWith('${DashboardRoutes.DASHBOARD}${e.page!.name}'))
-              .title);
+          if (finalRoutes.entries
+              .where((element) =>
+                  _location == element.value.page?.name.split('/').last)
+              .isNotEmpty) {
+            currentPageTitle(finalRoutes.entries
+                .singleWhere((element) =>
+                    _location == element.value.page?.name.split('/').last)
+                .key);
+          } else {
+            currentPageTitle("404");
+            delegate?.toNamed(DashboardRoutes.ERROR404);
+          }
+        } else {
+          currentPageTitle("404");
+          delegate?.toNamed(DashboardRoutes.ERROR404);
         }
+
         Get.log('Current dashboard route : ${currentPageTitle.value}');
       }
     });
     super.onInit();
+  }
+
+  @override
+  void onReady() {
+    isScreenLoading(false);
+    super.onReady();
   }
 
   @override

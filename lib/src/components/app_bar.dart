@@ -16,7 +16,6 @@ class AppBarOptions {
   final double? stretchTriggerOffset;
   final AsyncCallback? onStretchTrigger;
   final String searchHint;
-  final double? elevation;
   final ShapeBorder? shape;
   final bool? showTitle;
   const AppBarOptions({
@@ -35,7 +34,6 @@ class AppBarOptions {
     this.onStretchTrigger,
     this.searchDecoration,
     this.searchHint = 'Search...',
-    this.elevation,
     this.shape,
     this.showTitle,
   });
@@ -57,7 +55,6 @@ class AppBarOptions {
       onStretchTrigger: other?.onStretchTrigger ?? onStretchTrigger,
       searchHint: other?.searchHint ?? searchHint,
       searchDecoration: other?.searchDecoration ?? searchDecoration,
-      elevation: other?.elevation ?? elevation,
       shape: other?.shape ?? shape,
     );
   }
@@ -112,7 +109,7 @@ class _DashboardAppBar extends GetResponsiveView<FlutterDashboardController> {
           AppBarTheme(
             backgroundColor: Colors.transparent,
             foregroundColor: DefaultTextStyle.of(context).style.color,
-            elevation: appBar.elevation ?? 0,
+            elevation: appBar.theme?.elevation ?? 0,
           ),
     );
     var drawerTheme = theme.drawerTheme;
@@ -176,7 +173,8 @@ class _DashboardAppBar extends GetResponsiveView<FlutterDashboardController> {
       data: theme.copyWith(
         brightness: Theme.of(context).brightness,
         appBarTheme: appBarTheme.copyWith(
-          shape: _dashboard.config.enableSpacing
+          shape: _dashboard.config.enableSpacing ||
+                  _dashboard.config.enableBodySpacing
               ? appBar.shape ??
                   _dashboard.appBarOptions.theme?.shape ??
                   Theme.of(context).drawerTheme.shape ??
@@ -188,18 +186,22 @@ class _DashboardAppBar extends GetResponsiveView<FlutterDashboardController> {
           shadowColor: appBar.theme?.shadowColor ??
               _dashboard.appBarOptions.theme?.shadowColor ??
               Theme.of(context).shadowColor,
-          backgroundColor: appBar.theme?.backgroundColor ??
-              _dashboard.appBarOptions.theme?.backgroundColor ??
-              _dashboard.appBarOptions.theme?.backgroundColor ??
-              Theme.of(context).cardColor,
+          backgroundColor: screen.isDesktop
+              ? appBar.theme?.backgroundColor ??
+                  _dashboard.appBarOptions.theme?.backgroundColor ??
+                  _dashboard.appBarOptions.theme?.backgroundColor ??
+                  Theme.of(context).cardColor
+              : Theme.of(context).scaffoldBackgroundColor,
           foregroundColor: appBar.theme?.foregroundColor ??
               _dashboard.appBarOptions.theme?.foregroundColor ??
               _dashboard.appBarOptions.theme?.foregroundColor ??
-              Theme.of(context).appBarTheme.titleTextStyle?.color,
-          elevation: appBar.theme?.elevation ??
-              _dashboard.appBarOptions.theme?.elevation ??
-              _dashboard.appBarOptions.theme?.elevation ??
-              10,
+              DefaultTextStyle.of(context).style.color,
+          elevation: screen.isDesktop
+              ? appBar.theme?.elevation ??
+                  _dashboard.appBarOptions.theme?.elevation ??
+                  Theme.of(context).appBarTheme.elevation ??
+                  kDefaultElevation
+              : 0,
           actionsIconTheme: appBar.theme?.actionsIconTheme ??
               appBar.theme?.actionsIconTheme ??
               _dashboard.appBarOptions.theme?.actionsIconTheme ??
@@ -220,9 +222,13 @@ class _DashboardAppBar extends GetResponsiveView<FlutterDashboardController> {
       child: SliverPadding(
         padding: !isFloating || !screen.isDesktop
             ? EdgeInsets.zero
-            : _dashboard.config.enableSpacing
-                ? kDashboardAppbarPadding
-                : EdgeInsets.zero,
+            : _dashboard.config.enableBodySpacing
+                ? _dashboard.config.dashboardAppbarPadding ??
+                    kDashboardAppbarPadding
+                : _dashboard.config.enableSpacing
+                    ? _dashboard.config.dashboardAppbarPadding ??
+                        kDashboardAppbarPadding
+                    : EdgeInsets.zero,
         sliver: isFloating || screen.isDesktop
             ? SliverToBoxAdapter(
                 child: AppBar(
@@ -281,12 +287,13 @@ class _DashboardAppBar extends GetResponsiveView<FlutterDashboardController> {
   }
 }
 
-class _MoreMenu extends StatelessWidget {
+class _MoreMenu extends GetResponsiveView<FlutterDashboardController> {
   final List<Widget> children;
-  const _MoreMenu({Key? key, required this.children}) : super(key: key);
+  _MoreMenu({Key? key, required this.children}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    screen.context = context;
     // return IconButton(
     //   onPressed: () {
     //     print(children);
