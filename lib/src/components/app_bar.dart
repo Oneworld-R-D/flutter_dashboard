@@ -287,12 +287,13 @@ class _DashboardAppBar extends GetResponsiveView<FlutterDashboardController> {
   }
 }
 
-class _MoreMenu extends StatelessWidget {
+class _MoreMenu extends GetResponsiveView<FlutterDashboardController> {
   final List<Widget> children;
-  const _MoreMenu({Key? key, required this.children}) : super(key: key);
+  _MoreMenu({Key? key, required this.children}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    screen.context = context;
     // return IconButton(
     //   onPressed: () {
     //     print(children);

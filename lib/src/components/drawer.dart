@@ -18,6 +18,7 @@ class DrawerOptions {
   final EdgeInsetsGeometry? tileContentPadding;
   final ShapeBorder? tileShape;
   final DrawerSliverPersistentHeaderDelegate? overrideHeader;
+  final List<FlutterDashboardItem> footerNavItems;
 
   const DrawerOptions({
     this.headers = const [],
@@ -36,8 +37,8 @@ class DrawerOptions {
     this.tilePadding = EdgeInsets.zero,
     this.tileContentPadding,
     this.tileShape,
-    // this.headerHeight,
     this.overrideHeader,
+    this.footerNavItems = const [],
   });
 }
 
@@ -256,12 +257,30 @@ class _FlutterDashboardDrawer
                   height: _dashboardDrawer.listSpacing ?? 0,
                 ),
               ),
-              _DrawerList(),
-              if (_dashboardDrawer.footer != null)
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: _dashboardDrawer.footer ?? const SizedBox.shrink(),
+              _DrawerList(
+                finalRoutes: FlutterDashboardNavService.to.finalRoutes,
+              ),
+              SliverFillRemaining(
+                hasScrollBody: false,
+                child: Align(
+                  alignment: AlignmentDirectional.bottomStart,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      if (_dashboardDrawer.footerNavItems.isNotEmpty)
+                        _FooterNavList(),
+                      if (_dashboardDrawer.footerNavItems.isNotEmpty)
+                        const Divider(
+                          color: Colors.transparent,
+                        ),
+                      if (_dashboardDrawer.footer != null)
+                        _dashboardDrawer.footer ?? const SizedBox.shrink(),
+                    ],
+                  ),
                 ),
+              ),
             ],
           ),
         ),
@@ -270,8 +289,196 @@ class _FlutterDashboardDrawer
   }
 }
 
+class _FooterNavList extends GetResponsiveView<FlutterDashboardController> {
+  _FooterNavList({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    screen.context = context;
+    FlutterDashboardMaterialApp _dashboard =
+        FlutterDashboardMaterialApp.of(screen.context);
+
+    FlutterDashboardItem selectedItem = controller.selectedDrawerItem;
+
+    return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: _dashboard.drawerOptions.footerNavItems
+            .map(
+              (item) => Padding(
+                padding: _dashboard.drawerOptions.tilePadding,
+                child: Theme(
+                  data: Theme.of(context).copyWith(
+                    iconTheme: IconThemeData(
+                      color: Theme.of(screen.context)
+                          .textTheme
+                          .button
+                          ?.copyWith(
+                              color: _dashboard
+                                      .drawerOptions.selectedTextColor ??
+                                  (item == selectedItem
+                                      ? Get.isDarkMode
+                                          ? Theme.of(screen.context)
+                                              .textTheme
+                                              .button
+                                              ?.color
+                                          : Theme.of(screen.context)
+                                              .scaffoldBackgroundColor
+                                      : Theme.of(screen.context).disabledColor))
+                          .color,
+                    ),
+                    listTileTheme: ListTileThemeData(
+                      horizontalTitleGap: 0.0,
+                      shape: _dashboard.drawerOptions.tileShape,
+                      tileColor: item == selectedItem
+                          ? (_dashboard.drawerOptions.selectedItemColor ??
+                              Theme.of(screen.context)
+                                  .drawerTheme
+                                  .backgroundColor)
+                          : ((_dashboard.drawerOptions.unSelectedItemColor ==
+                                      Colors.transparent
+                                  ? Theme.of(screen.context)
+                                      .drawerTheme
+                                      .backgroundColor
+                                  : _dashboard
+                                      .drawerOptions.unSelectedItemColor) ??
+                              Theme.of(screen.context)
+                                  .drawerTheme
+                                  .backgroundColor),
+                      selectedColor: item == selectedItem
+                          ? (Theme.of(screen.context)
+                                  .textTheme
+                                  .button
+                                  ?.copyWith(
+                                      color: _dashboard.drawerOptions
+                                              .selectedTextColor ??
+                                          (item == selectedItem
+                                              ? Get.isDarkMode
+                                                  ? Theme.of(screen.context)
+                                                      .textTheme
+                                                      .button
+                                                      ?.color
+                                                  : Theme.of(screen.context)
+                                                      .scaffoldBackgroundColor
+                                              : Theme.of(screen.context)
+                                                  .disabledColor))
+                                  .color ??
+                              Theme.of(screen.context).primaryColor)
+                          : (_dashboard.drawerOptions.unSelectedItemColor ??
+                              Theme.of(screen.context)
+                                  .listTileTheme
+                                  .selectedColor),
+                      selectedTileColor: item == selectedItem
+                          ? (_dashboard.drawerOptions.selectedItemColor ??
+                              Theme.of(screen.context).primaryColor)
+                          : (_dashboard.drawerOptions.unSelectedItemColor ??
+                              Theme.of(screen.context)
+                                  .listTileTheme
+                                  .selectedTileColor),
+                      textColor: Theme.of(screen.context)
+                          .textTheme
+                          .button
+                          ?.copyWith(
+                              color: _dashboard
+                                      .drawerOptions.selectedTextColor ??
+                                  (item == selectedItem
+                                      ? Get.isDarkMode
+                                          ? Theme.of(screen.context)
+                                              .textTheme
+                                              .button
+                                              ?.color
+                                          : Theme.of(screen.context)
+                                              .indicatorColor
+                                      : Theme.of(screen.context).disabledColor))
+                          .color,
+                      iconColor: Theme.of(screen.context)
+                          .textTheme
+                          .button
+                          ?.copyWith(
+                              color: _dashboard
+                                      .drawerOptions.selectedTextColor ??
+                                  (item == selectedItem
+                                      ? Get.isDarkMode
+                                          ? Theme.of(screen.context)
+                                              .textTheme
+                                              .button
+                                              ?.color
+                                          : Theme.of(screen.context)
+                                              .indicatorColor
+                                      : Theme.of(screen.context).disabledColor))
+                          .color,
+                    ),
+                    dividerColor: Colors.transparent,
+                    shadowColor: _dashboard.appBarOptions.theme?.shadowColor ??
+                        Theme.of(screen.context).shadowColor,
+                  ),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      border: item == selectedItem
+                          ? Border.all(
+                              color: Theme.of(screen.context)
+                                      .textTheme
+                                      .button
+                                      ?.copyWith(
+                                          color: _dashboard.drawerOptions
+                                                  .selectedTextColor ??
+                                              (item == selectedItem
+                                                  ? Get.isDarkMode
+                                                      ? Theme.of(screen.context)
+                                                          .textTheme
+                                                          .button
+                                                          ?.color
+                                                      : Theme.of(screen.context)
+                                                          .indicatorColor
+                                                  : Theme.of(screen.context)
+                                                      .disabledColor))
+                                      .color ??
+                                  Colors.transparent,
+                            )
+                          : null,
+                      borderRadius: item == selectedItem
+                          ? BorderRadius.all(
+                              _dashboard.drawerOptions.tileShape == null
+                                  ? Radius.zero
+                                  : const Radius.circular(kDefaultRadius),
+                            )
+                          : BorderRadius.zero,
+                    ),
+                    child: ListTile(
+                      shape: _dashboard.drawerOptions.tileShape,
+                      contentPadding:
+                          _dashboard.drawerOptions.tileContentPadding,
+                      onTap: () {
+                        if (!screen.isDesktop) {
+                          Navigator.of(screen.context).pop();
+                        }
+                        if (controller.selectedDrawerItem.title != item.title) {
+                          FlutterDashboardController.to.delegate?.toNamed(
+                            "${DashboardRoutes.DASHBOARD}${item.page!.name}",
+                          );
+                        }
+                      },
+                      leading: item.icon,
+                      title: Text(
+                        item.title,
+                        textScaleFactor: Get.textScaleFactor,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            )
+            .toList());
+  }
+}
+
 class _DrawerList extends GetResponsiveView<FlutterDashboardController> {
-  _DrawerList({Key? key}) : super(key: key);
+  final List<FlutterDashboardItem> finalRoutes;
+  _DrawerList({
+    Key? key,
+    required this.finalRoutes,
+  }) : super(key: key);
 
   List<FlutterDashboardItem> _expanded(List<FlutterDashboardItem> items) {
     return items
@@ -309,16 +516,18 @@ class _DrawerList extends GetResponsiveView<FlutterDashboardController> {
                     ],
                   ),
                 ),
-          for (var _item in _dashboard.dashboardItems)
+          for (var _item in finalRoutes)
             Obx(
-              () => _buildList(
-                item: _item,
-                isFirstItem:
-                    _dashboard.dashboardItems.first.title == _item.title,
-                selectedItem: controller.selectedDrawerItem,
-                expanded: _expanded(_dashboard.dashboardItems),
-                isSubItem: false,
-              ),
+              () {
+                return _buildList(
+                  item: _item,
+                  isFirstItem: finalRoutes.first.title == _item.title,
+                  isLastSubItem: false,
+                  selectedItem: controller.selectedDrawerItem,
+                  expanded: _expanded(finalRoutes),
+                  isSubItem: false,
+                );
+              },
             ),
         ],
       ),
@@ -331,19 +540,37 @@ class _DrawerList extends GetResponsiveView<FlutterDashboardController> {
     required bool isFirstItem,
     required List<FlutterDashboardItem> expanded,
     required bool isSubItem,
+    required bool isLastSubItem,
   }) {
     return Padding(
-      padding: isFirstItem && isSubItem
+      padding: isFirstItem
           ? EdgeInsets.only(
+              top:
+                  isSubItem ? _dashboard.drawerOptions.tilePadding.vertical : 0,
               left: _dashboard.drawerOptions.tilePadding.horizontal -
-                  (_dashboard.drawerOptions.tilePadding.horizontal / 2),
+                  (isSubItem
+                      ? (_dashboard.drawerOptions.tilePadding.horizontal)
+                      : (_dashboard.drawerOptions.tilePadding.horizontal / 2)),
               right: _dashboard.drawerOptions.tilePadding.horizontal -
-                  (_dashboard.drawerOptions.tilePadding.horizontal / 2),
-              bottom: _dashboard.drawerOptions.tilePadding.vertical -
-                  (_dashboard.drawerOptions.tilePadding.vertical / 2),
+                  (isSubItem
+                      ? (_dashboard.drawerOptions.tilePadding.horizontal)
+                      : (_dashboard.drawerOptions.tilePadding.horizontal / 2)),
+              bottom: isSubItem
+                  ? _dashboard.drawerOptions.tilePadding.vertical
+                  : _dashboard.drawerOptions.tilePadding.vertical -
+                      (_dashboard.drawerOptions.tilePadding.vertical / 2),
             )
           : isSubItem
-              ? EdgeInsets.zero
+              ? EdgeInsets.only(
+                  left: _dashboard.drawerOptions.tilePadding.horizontal -
+                      (_dashboard.drawerOptions.tilePadding.horizontal),
+                  right: _dashboard.drawerOptions.tilePadding.horizontal -
+                      (_dashboard.drawerOptions.tilePadding.horizontal),
+                  bottom: isLastSubItem
+                      ? _dashboard.drawerOptions.tilePadding.vertical -
+                          (_dashboard.drawerOptions.tilePadding.vertical / 1)
+                      : _dashboard.drawerOptions.tilePadding.vertical,
+                )
               : _dashboard.drawerOptions.tilePadding,
       child: Theme(
         data: Theme.of(screen.context).copyWith(
@@ -353,7 +580,7 @@ class _DrawerList extends GetResponsiveView<FlutterDashboardController> {
                 .button
                 ?.copyWith(
                     color: _dashboard.drawerOptions.selectedTextColor ??
-                        (item == selectedItem || item == selectedItem
+                        (item == selectedItem
                             ? Get.isDarkMode
                                 ? Theme.of(screen.context)
                                     .textTheme
@@ -367,7 +594,7 @@ class _DrawerList extends GetResponsiveView<FlutterDashboardController> {
           listTileTheme: ListTileThemeData(
             horizontalTitleGap: 0.0,
             shape: _dashboard.drawerOptions.tileShape,
-            tileColor: item == selectedItem || item == selectedItem
+            tileColor: item == selectedItem
                 ? (_dashboard.drawerOptions.selectedItemColor ??
                     Theme.of(screen.context).drawerTheme.backgroundColor)
                 : ((_dashboard.drawerOptions.unSelectedItemColor ==
@@ -375,13 +602,13 @@ class _DrawerList extends GetResponsiveView<FlutterDashboardController> {
                         ? Theme.of(screen.context).drawerTheme.backgroundColor
                         : _dashboard.drawerOptions.unSelectedItemColor) ??
                     Theme.of(screen.context).drawerTheme.backgroundColor),
-            selectedColor: item == selectedItem || item == selectedItem
+            selectedColor: item == selectedItem
                 ? (Theme.of(screen.context)
                         .textTheme
                         .button
                         ?.copyWith(
                             color: _dashboard.drawerOptions.selectedTextColor ??
-                                (item == selectedItem || item == selectedItem
+                                (item == selectedItem
                                     ? Get.isDarkMode
                                         ? Theme.of(screen.context)
                                             .textTheme
@@ -394,7 +621,7 @@ class _DrawerList extends GetResponsiveView<FlutterDashboardController> {
                     Theme.of(screen.context).primaryColor)
                 : (_dashboard.drawerOptions.unSelectedItemColor ??
                     Theme.of(screen.context).listTileTheme.selectedColor),
-            selectedTileColor: item == selectedItem || item == selectedItem
+            selectedTileColor: item == selectedItem
                 ? (_dashboard.drawerOptions.selectedItemColor ??
                     Theme.of(screen.context).primaryColor)
                 : (_dashboard.drawerOptions.unSelectedItemColor ??
@@ -404,7 +631,7 @@ class _DrawerList extends GetResponsiveView<FlutterDashboardController> {
                 .button
                 ?.copyWith(
                     color: _dashboard.drawerOptions.selectedTextColor ??
-                        (item == selectedItem || item == selectedItem
+                        (item == selectedItem
                             ? Get.isDarkMode
                                 ? Theme.of(screen.context)
                                     .textTheme
@@ -419,7 +646,7 @@ class _DrawerList extends GetResponsiveView<FlutterDashboardController> {
                 .button
                 ?.copyWith(
                     color: _dashboard.drawerOptions.selectedTextColor ??
-                        (item == selectedItem || item == selectedItem
+                        (item == selectedItem
                             ? Get.isDarkMode
                                 ? Theme.of(screen.context)
                                     .textTheme
@@ -441,7 +668,6 @@ class _DrawerList extends GetResponsiveView<FlutterDashboardController> {
                     .any((element) => element == selectedItem),
                 leading: item.icon,
                 tilePadding: _dashboard.drawerOptions.tileContentPadding,
-                childrenPadding: EdgeInsets.zero,
                 expandedAlignment: Alignment.center,
                 expandedCrossAxisAlignment: CrossAxisAlignment.center,
                 controlAffinity: ListTileControlAffinity.platform,
@@ -450,7 +676,7 @@ class _DrawerList extends GetResponsiveView<FlutterDashboardController> {
                     .button
                     ?.copyWith(
                         color: _dashboard.drawerOptions.selectedTextColor ??
-                            (item == selectedItem || item == selectedItem
+                            (item == selectedItem
                                 ? Get.isDarkMode
                                     ? Theme.of(screen.context)
                                         .textTheme
@@ -465,7 +691,7 @@ class _DrawerList extends GetResponsiveView<FlutterDashboardController> {
                     .button
                     ?.copyWith(
                         color: _dashboard.drawerOptions.selectedTextColor ??
-                            (item == selectedItem || item == selectedItem
+                            (item == selectedItem
                                 ? Get.isDarkMode
                                     ? Theme.of(screen.context)
                                         .textTheme
@@ -485,7 +711,8 @@ class _DrawerList extends GetResponsiveView<FlutterDashboardController> {
                   for (var subItem in item.subItems)
                     _buildList(
                       selectedItem: selectedItem,
-                      isFirstItem: isFirstItem,
+                      isLastSubItem: item.subItems.last.title == subItem.title,
+                      isFirstItem: item.subItems.first.title == subItem.title,
                       item: subItem,
                       expanded: expanded,
                       isSubItem: true,
@@ -505,8 +732,8 @@ class _DrawerList extends GetResponsiveView<FlutterDashboardController> {
                     );
                   }
                 },
-                selected: item == selectedItem || item == selectedItem,
-                leading: item == selectedItem || item == selectedItem
+                selected: item == selectedItem,
+                leading: item == selectedItem
                     ? (item.selectedIcon ?? item.icon)
                     : item.icon,
                 title: Text(

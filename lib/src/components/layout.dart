@@ -36,15 +36,17 @@ class FlutterDashboardRootView
           controller.currentRoute(currentRoute?.location ?? '/');
 
           return Obx(
-            () => controller.isScreenLoading.value
-                ? Scaffold(
-                    body: Center(
-                      child: CircularProgressIndicator(
-                        color: Theme.of(context).indicatorColor,
-                      ),
-                    ),
-                  )
-                : _buildBody(context),
+            () => controller.currentPageTitle.value == "404"
+                ? dashboard.notFoundPage
+                : controller.isScreenLoading.value
+                    ? Scaffold(
+                        body: Center(
+                          child: CircularProgressIndicator(
+                            color: Theme.of(context).indicatorColor,
+                          ),
+                        ),
+                      )
+                    : _buildBody(context),
           );
         },
       ),
@@ -66,7 +68,7 @@ class FlutterDashboardRootView
               drawerIcon: _DrawerIcon(),
             ),
       onDrawerChanged: (isOpened) {
-        print(isOpened);
+        // print(isOpened);
         controller.isDrawerOpen(isOpened);
       },
       body: Builder(builder: (_) {

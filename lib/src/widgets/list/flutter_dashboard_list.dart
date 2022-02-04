@@ -33,6 +33,9 @@ class FlutterDashboardListView<T> extends GetResponsiveView<T> {
   bool? reverse;
   FlutterDashboardListType? listType;
   FlutterDashboardGridDelegate? gridDelegate;
+  double? crossAxisSpacing;
+  double? mainAxisSpacing;
+  ScrollController? scrollController;
 
   FlutterDashboardListView.list({
     Key? key,
@@ -43,7 +46,10 @@ class FlutterDashboardListView<T> extends GetResponsiveView<T> {
     required this.buildItem,
     required this.listType,
     this.dividerBuilder,
+    this.scrollController,
   }) : super(key: key) {
+    crossAxisSpacing = null;
+    mainAxisSpacing = null;
     slivers = const [];
     physics = null;
     scrollDirection = null;
@@ -67,6 +73,9 @@ class FlutterDashboardListView<T> extends GetResponsiveView<T> {
     this.shrinkWrap,
     this.reverse,
     this.gridDelegate,
+    this.crossAxisSpacing = 0,
+    this.mainAxisSpacing = 0,
+    this.scrollController,
   }) : super(key: key) {
     slivers = const [];
     scrollBehavior = null;
@@ -81,7 +90,10 @@ class FlutterDashboardListView<T> extends GetResponsiveView<T> {
     this.scrollBehavior,
     this.shrinkWrap,
     this.reverse,
+    this.scrollController,
   }) : super(key: key) {
+    crossAxisSpacing = null;
+    mainAxisSpacing = null;
     listType = null;
     buildItem = null;
     isSliverItem = false;
@@ -97,7 +109,7 @@ class FlutterDashboardListView<T> extends GetResponsiveView<T> {
     screen.context = context;
     if (listType == null) {
       return CustomScrollView(
-        controller: ScrollController(),
+        controller: scrollController,
         physics: physics,
         scrollDirection: scrollDirection ?? Axis.vertical,
         scrollBehavior: scrollBehavior ??
@@ -108,7 +120,7 @@ class FlutterDashboardListView<T> extends GetResponsiveView<T> {
       );
     } else {
       if (listType == FlutterDashboardListType.Grid) {
-        if (isSliverItem!) {
+        if (isSliverItem ?? true) {
           return SliverPadding(
             padding: padding ??
                 const EdgeInsets.symmetric(
@@ -121,6 +133,8 @@ class FlutterDashboardListView<T> extends GetResponsiveView<T> {
                     screen: screen,
                     length: childCount,
                   ),
+              crossAxisSpacing: crossAxisSpacing!,
+              mainAxisSpacing: mainAxisSpacing!,
               delegate: SliverChildBuilderDelegate(
                 buildItem!,
                 childCount: childCount,
@@ -135,6 +149,7 @@ class FlutterDashboardListView<T> extends GetResponsiveView<T> {
                   vertical: 10,
                 ),
             child: MasonryGridView.builder(
+              controller: scrollController,
               physics: physics,
               scrollDirection: scrollDirection ?? Axis.vertical,
               shrinkWrap: shrinkWrap ?? true,
@@ -143,13 +158,16 @@ class FlutterDashboardListView<T> extends GetResponsiveView<T> {
                     screen: screen,
                     length: childCount,
                   ),
+              clipBehavior: Clip.antiAliasWithSaveLayer,
+              crossAxisSpacing: crossAxisSpacing!,
+              mainAxisSpacing: mainAxisSpacing!,
               itemBuilder: buildItem!,
               itemCount: childCount,
             ),
           );
         }
       } else {
-        if (isSliverItem!) {
+        if (isSliverItem ?? true) {
           return SliverPadding(
             padding: padding ??
                 const EdgeInsets.symmetric(
@@ -171,6 +189,7 @@ class FlutterDashboardListView<T> extends GetResponsiveView<T> {
                   vertical: 10,
                 ),
             child: ListView.separated(
+              controller: scrollController,
               physics: physics,
               scrollDirection: scrollDirection ?? Axis.vertical,
               shrinkWrap: shrinkWrap ?? true,
