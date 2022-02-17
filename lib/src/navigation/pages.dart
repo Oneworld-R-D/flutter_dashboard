@@ -25,7 +25,7 @@ class DashboardPages {
     _rootPages.addAll(_pages);
   }
 
-  static GetPage unknownPage = GetPage(
+  static final GetPage errorPage = GetPage(
     name: _Paths.ERROR404,
     page: () => const Scaffold(
       body: Center(
@@ -65,12 +65,12 @@ class DashboardPages {
                   return GetRouterOutlet(
                     initialRoute: DashboardRoutes.DASHBOARD,
                     delegate: GetDelegate(
-                      notFoundRoute: unknownPage,
+                      notFoundRoute: errorPage,
                     ),
                   );
                 },
           ),
-          unknownRoute: unknownPage,
+          unknownRoute: errorPage,
           children: [
             // GetPage(
             //   preventDuplicates: true,

@@ -12,6 +12,7 @@ class DrawerOptions {
   final Color? selectedItemColor;
   final Color? unSelectedItemColor;
   final Color? selectedTextColor;
+  final Color? unselectedTextColor;
   final bool centerHeaderLogo;
   final double? listSpacing;
   final EdgeInsetsGeometry tilePadding;
@@ -32,6 +33,7 @@ class DrawerOptions {
     this.selectedItemColor,
     this.unSelectedItemColor,
     this.selectedTextColor,
+    this.unselectedTextColor,
     this.centerHeaderLogo = false,
     this.listSpacing,
     this.tilePadding = EdgeInsets.zero,
@@ -89,6 +91,7 @@ class _DrawerIcon extends GetResponsiveView<FlutterDashboardController> {
         padding: EdgeInsets.zero,
         icon: AnimatedIcon(
           icon: AnimatedIcons.close_menu,
+          color: Theme.of(context).iconTheme.color,
           progress: Tween(
                   begin: controller.isDrawerOpen.value ? 1.0 : 0.0,
                   end: controller.isDrawerOpen.value ? 0.0 : 1.0)
@@ -202,15 +205,17 @@ class _FlutterDashboardDrawer
         gradient: _dashboardDrawer.gradient,
       ),
       child: Material(
-        elevation: _dashboard.config.theme != null ||
-                _dashboard.config.darkTheme != null
-            ? Get.theme.drawerTheme.elevation ??
-                Theme.of(context).drawerTheme.elevation ??
-                (Get.isDarkMode
-                    ? _dashboard.config.darkTheme?.drawerTheme.elevation
-                    : _dashboard.config.theme?.drawerTheme.elevation) ??
-                kDefaultElevation
-            : kDefaultElevation,
+        elevation: (_dashboard.appBarOptions.floating ?? false)
+            ? _dashboard.config.theme != null ||
+                    _dashboard.config.darkTheme != null
+                ? Get.theme.drawerTheme.elevation ??
+                    Theme.of(context).drawerTheme.elevation ??
+                    (Get.isDarkMode
+                        ? _dashboard.config.darkTheme?.drawerTheme.elevation
+                        : _dashboard.config.theme?.drawerTheme.elevation) ??
+                    kDefaultElevation
+                : kDefaultElevation
+            : 2,
         shape: _dashboard.config.enableSpacing
             ? screen.isDesktop
                 ? Theme.of(context).drawerTheme.shape ??
@@ -330,7 +335,13 @@ class _FooterNavList extends GetResponsiveView<FlutterDashboardController> {
                     ),
                     listTileTheme: ListTileThemeData(
                       horizontalTitleGap: 0.0,
-                      shape: _dashboard.drawerOptions.tileShape,
+                      // shape: _dashboard.drawerOptions.tileShape,
+                      shape: _dashboard.drawerOptions.tileShape == null
+                          ? null
+                          : RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.circular(kDefaultRadius),
+                            ),
                       tileColor: item == selectedItem
                           ? (_dashboard.drawerOptions.selectedItemColor ??
                               Theme.of(screen.context)
@@ -361,27 +372,26 @@ class _FooterNavList extends GetResponsiveView<FlutterDashboardController> {
                                                       ?.color
                                                   : Theme.of(screen.context)
                                                       .scaffoldBackgroundColor
-                                              : Theme.of(screen.context)
-                                                  .disabledColor))
+                                              : DefaultTextStyle.of(context)
+                                                  .style
+                                                  .color))
                                   .color ??
                               Theme.of(screen.context).primaryColor)
                           : (_dashboard.drawerOptions.unSelectedItemColor ??
                               Theme.of(screen.context)
                                   .listTileTheme
-                                  .selectedColor),
-                      selectedTileColor: item == selectedItem
-                          ? (_dashboard.drawerOptions.selectedItemColor ??
-                              Theme.of(screen.context).primaryColor)
-                          : (_dashboard.drawerOptions.unSelectedItemColor ??
-                              Theme.of(screen.context)
-                                  .listTileTheme
-                                  .selectedTileColor),
+                                  .selectedColor ??
+                              DefaultTextStyle.of(context).style.color),
+                      selectedTileColor: Theme.of(screen.context)
+                              .drawerTheme
+                              .backgroundColor ??
+                          Colors.transparent,
                       textColor: Theme.of(screen.context)
                           .textTheme
                           .button
                           ?.copyWith(
                               color: _dashboard
-                                      .drawerOptions.selectedTextColor ??
+                                      .drawerOptions.unselectedTextColor ??
                                   (item == selectedItem
                                       ? Get.isDarkMode
                                           ? Theme.of(screen.context)
@@ -389,7 +399,7 @@ class _FooterNavList extends GetResponsiveView<FlutterDashboardController> {
                                               .button
                                               ?.color
                                           : Theme.of(screen.context)
-                                              .indicatorColor
+                                              .primaryColor
                                       : Theme.of(screen.context).disabledColor))
                           .color,
                       iconColor: Theme.of(screen.context)
@@ -397,7 +407,7 @@ class _FooterNavList extends GetResponsiveView<FlutterDashboardController> {
                           .button
                           ?.copyWith(
                               color: _dashboard
-                                      .drawerOptions.selectedTextColor ??
+                                      .drawerOptions.unselectedTextColor ??
                                   (item == selectedItem
                                       ? Get.isDarkMode
                                           ? Theme.of(screen.context)
@@ -405,7 +415,7 @@ class _FooterNavList extends GetResponsiveView<FlutterDashboardController> {
                                               .button
                                               ?.color
                                           : Theme.of(screen.context)
-                                              .indicatorColor
+                                              .primaryColor
                                       : Theme.of(screen.context).disabledColor))
                           .color,
                     ),
@@ -430,7 +440,7 @@ class _FooterNavList extends GetResponsiveView<FlutterDashboardController> {
                                                           .button
                                                           ?.color
                                                       : Theme.of(screen.context)
-                                                          .indicatorColor
+                                                          .primaryColor
                                                   : Theme.of(screen.context)
                                                       .disabledColor))
                                       .color ??
@@ -446,7 +456,7 @@ class _FooterNavList extends GetResponsiveView<FlutterDashboardController> {
                           : BorderRadius.zero,
                     ),
                     child: ListTile(
-                      shape: _dashboard.drawerOptions.tileShape,
+                      // shape: _dashboard.drawerOptions.tileShape,
                       contentPadding:
                           _dashboard.drawerOptions.tileContentPadding,
                       onTap: () {
@@ -460,6 +470,7 @@ class _FooterNavList extends GetResponsiveView<FlutterDashboardController> {
                         }
                       },
                       leading: item.icon,
+                      selected: item == selectedItem,
                       title: Text(
                         item.title,
                         textScaleFactor: Get.textScaleFactor,
@@ -625,37 +636,44 @@ class _DrawerList extends GetResponsiveView<FlutterDashboardController> {
                 ? (_dashboard.drawerOptions.selectedItemColor ??
                     Theme.of(screen.context).primaryColor)
                 : (_dashboard.drawerOptions.unSelectedItemColor ??
-                    Theme.of(screen.context).listTileTheme.selectedTileColor),
+                        Theme.of(screen.context)
+                            .listTileTheme
+                            .selectedTileColor) ??
+                    Theme.of(screen.context).primaryColor,
             textColor: Theme.of(screen.context)
-                .textTheme
-                .button
-                ?.copyWith(
-                    color: _dashboard.drawerOptions.selectedTextColor ??
-                        (item == selectedItem
-                            ? Get.isDarkMode
+                    .textTheme
+                    .button
+                    ?.copyWith(
+                        color: (item == selectedItem
+                                ? _dashboard.drawerOptions.selectedTextColor
+                                : _dashboard
+                                    .drawerOptions.unselectedTextColor) ??
+                            (Get.isDarkMode
                                 ? Theme.of(screen.context)
                                     .textTheme
                                     .button
                                     ?.color
                                 : Theme.of(screen.context)
-                                    .scaffoldBackgroundColor
-                            : Theme.of(screen.context).disabledColor))
-                .color,
+                                    .scaffoldBackgroundColor))
+                    .color ??
+                DefaultTextStyle.of(screen.context).style.color,
             iconColor: Theme.of(screen.context)
-                .textTheme
-                .button
-                ?.copyWith(
-                    color: _dashboard.drawerOptions.selectedTextColor ??
-                        (item == selectedItem
-                            ? Get.isDarkMode
+                    .textTheme
+                    .button
+                    ?.copyWith(
+                        color: (item == selectedItem
+                                ? _dashboard.drawerOptions.selectedTextColor
+                                : _dashboard
+                                    .drawerOptions.unselectedTextColor) ??
+                            (Get.isDarkMode
                                 ? Theme.of(screen.context)
                                     .textTheme
                                     .button
                                     ?.color
                                 : Theme.of(screen.context)
-                                    .scaffoldBackgroundColor
-                            : Theme.of(screen.context).disabledColor))
-                .color,
+                                    .scaffoldBackgroundColor))
+                    .color ??
+                DefaultTextStyle.of(screen.context).style.color,
           ),
           dividerColor: Colors.transparent,
           shadowColor: _dashboard.appBarOptions.theme?.shadowColor ??
@@ -671,20 +689,21 @@ class _DrawerList extends GetResponsiveView<FlutterDashboardController> {
                 expandedAlignment: Alignment.center,
                 expandedCrossAxisAlignment: CrossAxisAlignment.center,
                 controlAffinity: ListTileControlAffinity.platform,
+                onExpansionChanged: controller.isTileExpantionChanged,
+                backgroundColor: Colors.transparent,
+                collapsedBackgroundColor: Colors.transparent,
                 collapsedTextColor: Theme.of(screen.context)
                     .textTheme
                     .button
                     ?.copyWith(
                         color: _dashboard.drawerOptions.selectedTextColor ??
-                            (item == selectedItem
-                                ? Get.isDarkMode
-                                    ? Theme.of(screen.context)
-                                        .textTheme
-                                        .button
-                                        ?.color
-                                    : Theme.of(screen.context)
-                                        .scaffoldBackgroundColor
-                                : Theme.of(screen.context).disabledColor))
+                            (Get.isDarkMode
+                                ? Theme.of(screen.context)
+                                    .textTheme
+                                    .button
+                                    ?.color
+                                : Theme.of(screen.context)
+                                    .scaffoldBackgroundColor))
                     .color,
                 collapsedIconColor: Theme.of(screen.context)
                     .textTheme
@@ -703,10 +722,25 @@ class _DrawerList extends GetResponsiveView<FlutterDashboardController> {
                     .color,
                 iconColor: _dashboard.drawerOptions.selectedItemColor ??
                     Theme.of(screen.context).indicatorColor,
-                textColor: _dashboard.drawerOptions.selectedItemColor ??
-                    Theme.of(screen.context).indicatorColor,
-                backgroundColor: _dashboard.drawerOptions.selectedItemColor ??
-                    Theme.of(screen.context).listTileTheme.tileColor,
+                textColor: Theme.of(screen.context)
+                        .textTheme
+                        .button
+                        ?.copyWith(
+                            color: (item == selectedItem
+                                    ? _dashboard.drawerOptions.selectedTextColor
+                                    : _dashboard
+                                        .drawerOptions.unselectedTextColor) ??
+                                (Get.isDarkMode
+                                    ? Theme.of(screen.context)
+                                        .textTheme
+                                        .button
+                                        ?.color
+                                    : Theme.of(screen.context)
+                                        .scaffoldBackgroundColor))
+                        .color ??
+                    DefaultTextStyle.of(screen.context).style.color,
+                // backgroundColor: _dashboard.drawerOptions.selectedItemColor ??
+                //     Theme.of(screen.context).listTileTheme.tileColor,
                 children: [
                   for (var subItem in item.subItems)
                     _buildList(

@@ -80,8 +80,11 @@ class _FlutterDashboardMaterialAppState<T>
       transitionDuration: Get.defaultTransitionDuration,
       defaultTransition: Transition.leftToRightWithFade,
       customTransition: Get.customTransition,
-      theme: widget.config.theme,
-      darkTheme: widget.config.darkTheme,
+      theme:
+          widget.config.theme ?? Get.rootController.theme ?? ThemeData.light(),
+      darkTheme: widget.config.darkTheme ??
+          Get.rootController.darkTheme ??
+          ThemeData.dark(),
       themeMode: widget.config.themeMode,
       locale: widget.config.locale ?? Get.deviceLocale,
       localizationsDelegates: widget.config.localizationsDelegates,
@@ -94,7 +97,7 @@ class _FlutterDashboardMaterialAppState<T>
       translationsKeys: widget.config.translations?.keys ?? Get.translations,
       builder: widget.builder,
       navigatorObservers: widget.navigatorObservers,
-      unknownRoute: DashboardPages.unknownPage,
+      unknownRoute: DashboardPages.errorPage,
       initialBinding: BindingsBuilder(
         () {
           Get.put(

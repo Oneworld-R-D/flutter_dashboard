@@ -7,8 +7,8 @@ const EdgeInsetsGeometry kDashboardAppbarPadding =
 const EdgeInsetsGeometry kDashboardContentPadding = EdgeInsets.only(
   left: 20,
   right: 20,
-  top: kToolbarHeight - 40,
-  bottom: 20, //(56 - 50 = 6)
+  top: kToolbarHeight - 40, //(56 - 40 = 16)
+  bottom: kToolbarHeight - 40, //(56 - 40 = 16)
 );
 
 const double kDefaultRadius = 10;
@@ -154,14 +154,16 @@ class _DashboardBody extends GetResponsiveView<FlutterDashboardController> {
                 : const RoundedRectangleBorder()
             : const RoundedRectangleBorder(),
         clipBehavior: Clip.antiAliasWithSaveLayer,
-        color:
-            _dashboard.config.theme != null || _dashboard.config.theme != null
-                ? Theme.of(context).scaffoldBackgroundColor
-                : Theme.of(context).cardColor,
+        color: _dashboard.config.theme != null ||
+                _dashboard.config.darkTheme != null
+            ? Theme.of(context).drawerTheme.backgroundColor
+            : Theme.of(context).cardColor,
         shadowColor: Theme.of(context).shadowColor,
-        elevation: screen.isDesktop
-            ? Theme.of(context).drawerTheme.elevation ?? kDefaultElevation
-            : 0,
+        elevation: (_dashboard.appBarOptions.floating ?? false)
+            ? screen.isDesktop
+                ? Theme.of(context).drawerTheme.elevation ?? kDefaultElevation
+                : 0
+            : 1,
         child: GetRouterOutlet(
           initialRoute: controller.dashboardInitialRoute,
           anchorRoute: DashboardRoutes.DASHBOARD,

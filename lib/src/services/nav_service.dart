@@ -24,6 +24,7 @@ class FlutterDashboardNavService extends GetxService {
   final RxList<String> enabledRoutes = RxList<String>();
 
   void _getAllEnabledRoutes() {
+    _allRoutes.addAll(navItems);
     ever(enabledRoutes, (List<String> _enabledRouteItems) {
       _allRoutes.clear();
       if (_enabledRouteItems.isNotEmpty) {
@@ -34,16 +35,16 @@ class FlutterDashboardNavService extends GetxService {
             }
           }
         }
-      } else {
-        _allRoutes.addAll(navItems);
       }
+      // else {
+      //   _allRoutes.addAll(navItems);
+      // }
     });
   }
 
   @override
   void onInit() {
     _getAllEnabledRoutes();
-
     super.onInit();
   }
 }

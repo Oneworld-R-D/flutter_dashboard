@@ -109,7 +109,7 @@ class _DashboardAppBar extends GetResponsiveView<FlutterDashboardController> {
           AppBarTheme(
             backgroundColor: Colors.transparent,
             foregroundColor: DefaultTextStyle.of(context).style.color,
-            elevation: appBar.theme?.elevation ?? 0,
+            elevation: appBar.theme?.elevation ?? 2,
           ),
     );
     var drawerTheme = theme.drawerTheme;
@@ -123,17 +123,6 @@ class _DashboardAppBar extends GetResponsiveView<FlutterDashboardController> {
     var actions = [
       ...selected.actions,
       if (!selected.overrideActions) ..._dashboard.overrideActions,
-      // if (_dashboard.authConfig.rootUser != null)
-      // IconButton(
-      //   onPressed: () async {
-      //     controller.isScreenLoading(true);
-      //     await FlutterDashboardAuthService.to.logout();
-      //     controller.isScreenLoading(false);
-      //   },
-      //   icon: const Icon(
-      //     Icons.logout_rounded,
-      //   ),
-      // ),
     ];
 
     bool isFloating = screen.isDesktop
@@ -175,37 +164,51 @@ class _DashboardAppBar extends GetResponsiveView<FlutterDashboardController> {
         appBarTheme: appBarTheme.copyWith(
           shape: _dashboard.config.enableSpacing ||
                   _dashboard.config.enableBodySpacing
-              ? appBar.shape ??
-                  _dashboard.appBarOptions.theme?.shape ??
-                  Theme.of(context).drawerTheme.shape ??
-                  RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(
-                    _dashboard.config.radius,
-                  ))
+              ? screen.isDesktop
+                  ? appBar.shape ??
+                      _dashboard.appBarOptions.theme?.shape ??
+                      Theme.of(context).drawerTheme.shape ??
+                      RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(
+                        _dashboard.config.radius,
+                      ))
+                  : const RoundedRectangleBorder()
               : null,
           shadowColor: appBar.theme?.shadowColor ??
               _dashboard.appBarOptions.theme?.shadowColor ??
               Theme.of(context).shadowColor,
-          backgroundColor: screen.isDesktop
-              ? appBar.theme?.backgroundColor ??
-                  _dashboard.appBarOptions.theme?.backgroundColor ??
-                  _dashboard.appBarOptions.theme?.backgroundColor ??
-                  Theme.of(context).cardColor
-              : Theme.of(context).scaffoldBackgroundColor,
+          // backgroundColor: screen.isDesktop
+          //     ?
+          //     : Theme.of(context).scaffoldBackgroundColor,
+          backgroundColor: appBar.theme?.backgroundColor ??
+              _dashboard.appBarOptions.theme?.backgroundColor ??
+              _dashboard.appBarOptions.theme?.backgroundColor ??
+              Theme.of(context).drawerTheme.backgroundColor ??
+              AppBarTheme.of(context).backgroundColor ??
+              Theme.of(context).primaryColor,
           foregroundColor: appBar.theme?.foregroundColor ??
               _dashboard.appBarOptions.theme?.foregroundColor ??
               _dashboard.appBarOptions.theme?.foregroundColor ??
+              AppBarTheme.of(context).foregroundColor ??
               DefaultTextStyle.of(context).style.color,
-          elevation: screen.isDesktop
-              ? appBar.theme?.elevation ??
-                  _dashboard.appBarOptions.theme?.elevation ??
-                  Theme.of(context).appBarTheme.elevation ??
-                  kDefaultElevation
-              : 0,
+          elevation: isFloating
+              ? screen.isDesktop
+                  ? appBar.theme?.elevation ??
+                      _dashboard.appBarOptions.theme?.elevation ??
+                      Theme.of(context).appBarTheme.elevation ??
+                      kDefaultElevation
+                  : 0
+              : 1,
+          iconTheme: appBar.theme?.iconTheme ??
+              appBar.theme?.iconTheme ??
+              _dashboard.appBarOptions.theme?.iconTheme ??
+              Theme.of(context).appBarTheme.iconTheme ??
+              Theme.of(context).iconTheme,
           actionsIconTheme: appBar.theme?.actionsIconTheme ??
               appBar.theme?.actionsIconTheme ??
               _dashboard.appBarOptions.theme?.actionsIconTheme ??
-              Theme.of(context).appBarTheme.actionsIconTheme,
+              Theme.of(context).appBarTheme.actionsIconTheme ??
+              Theme.of(context).iconTheme,
         ),
         inputDecorationTheme: InputDecorationTheme(
           fillColor: _dashboard.drawerOptions.backgroundColor ??
@@ -221,7 +224,7 @@ class _DashboardAppBar extends GetResponsiveView<FlutterDashboardController> {
       ),
       child: SliverPadding(
         padding: !isFloating || !screen.isDesktop
-            ? EdgeInsets.zero
+            ? kDashboardAppbarPadding
             : _dashboard.config.enableBodySpacing
                 ? _dashboard.config.dashboardAppbarPadding ??
                     kDashboardAppbarPadding

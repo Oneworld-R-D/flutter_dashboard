@@ -11,7 +11,9 @@ class FlutterDashboardController extends GetxController
 
   final RxString currentRoute = ''.obs, currentPageTitle = ''.obs;
 
-  final RxBool isScreenLoading = false.obs, isDrawerOpen = false.obs;
+  final RxBool isScreenLoading = false.obs,
+      isDrawerOpen = false.obs,
+      isTileExpantionChanged = false.obs;
 
   late AnimationController expansionController;
   late FocusNode focusNode;
@@ -52,8 +54,12 @@ class FlutterDashboardController extends GetxController
 
   @override
   void onInit() {
-    _addRoutes(_navService.finalRoutes);
-    _addRoutes(_navService.rawFooterRoutes);
+    WidgetsBinding.instance?.addPersistentFrameCallback((_) {
+      // print(_navService.finalRoutes);
+      _addRoutes(_navService.rawFooterRoutes);
+      _addRoutes(_navService.finalRoutes);
+    });
+
     isScreenLoading(true);
 
     focusNode = FocusNode();
@@ -69,28 +75,43 @@ class FlutterDashboardController extends GetxController
       if (_location.isEmpty || _location == 'dashboard') {
         currentPageTitle(_navService.rawRoutes.first.title);
       } else {
-        if (finalRoutes.entries
-            .map((element) =>
-                _location == element.value.page?.name.split('/').last)
-            .isNotEmpty) {
-          if (finalRoutes.entries
-              .where((element) =>
-                  _location == element.value.page?.name.split('/').last)
+        // print(_location);
+        // print(finalRoutes);
+        // print(finalRoutes);
+        // print(finalRoutes.entries.map((element) =>
+        //     _location == element.value.page?.name.split('/').last));
+
+        // print(finalRoutes.values.where((FlutterDashboardItem element) =>
+        //     _location.contains('${element.page?.name.split('/').last}')));
+
+        WidgetsBinding.instance?.addPersistentFrameCallback((_) {
+          if (finalRoutes.values
+              .where((FlutterDashboardItem element) =>
+                  _location.contains('${element.page?.name.split('/').last}'))
               .isNotEmpty) {
-            currentPageTitle(finalRoutes.entries
-                .singleWhere((element) =>
-                    _location == element.value.page?.name.split('/').last)
-                .key);
+            // if (finalRoutes.entries
+            //     .where((element) =>
+            //         _location == element.value.page?.name.split('/').last)
+            //     .isNotEmpty) {
+            //   currentPageTitle(finalRoutes.entries
+            //       .singleWhere((element) =>
+            //           _location == element.value.page?.name.split('/').last)
+            //       .key);
+            // } else {
+            //   currentPageTitle("404");
+            //   delegate?.toNamed(DashboardRoutes.ERROR404);
+            // }
+            currentPageTitle(finalRoutes.values
+                .singleWhere((FlutterDashboardItem element) =>
+                    _location.contains('${element.page?.name.split('/').last}'))
+                .title);
           } else {
             currentPageTitle("404");
             delegate?.toNamed(DashboardRoutes.ERROR404);
           }
-        } else {
-          currentPageTitle("404");
-          delegate?.toNamed(DashboardRoutes.ERROR404);
-        }
+        });
 
-        Get.log('Current dashboard route : ${currentPageTitle.value}');
+        // Get.log('Current dashboard route : ${currentPageTitle.value}');
       }
     });
     super.onInit();
