@@ -33,7 +33,9 @@ class FlutterDashboardNavService extends GetxService {
           for (var _routeItem in rawRoutes) {
             for (var _enabledItem in _enabledRouteItems) {
               if (_routeItem.title == _enabledItem) {
-                _allRoutes.add(_routeItem);
+                if (!_allRoutes.contains(_routeItem)) {
+                   _allRoutes.add(_routeItem);
+                }
               }
             }
           }
