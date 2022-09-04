@@ -125,11 +125,11 @@ abstract class FlutterDashboardDrawerHeaderDelegate
   }
 }
 
-mixin DrawerHeaderMixin {
-  double? height;
-  Widget? drawerIcon;
-  Widget? brandLogo;
-}
+// mixin DrawerHeaderMixin {
+//   double? height;
+//   Widget? drawerIcon;
+//   Widget? brandLogo;
+// }
 
 class _DrawerHeader extends FlutterDashboardDrawerHeaderDelegate {
   final ResponsiveScreen screen;

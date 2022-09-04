@@ -71,6 +71,7 @@ class DashboardPages {
                 },
           ),
           unknownRoute: errorPage,
+          middlewares: dashboardMiddlewares,
           children: [
             // GetPage(
             //   preventDuplicates: true,
@@ -90,11 +91,11 @@ class DashboardPages {
               preventDuplicates: true,
               name: _Paths.DASHBOARD,
               page: () => FlutterDashboardRootView(),
-              binding: BindingsBuilder(() {
-                Get.lazyPut<FlutterDashboardController>(
+              binding: BindingsBuilder(
+                () => Get.lazyPut<FlutterDashboardController>(
                   () => FlutterDashboardController(),
-                );
-              }),
+                ),
+              ),
               title: null,
               transition: Transition.fadeIn,
               children: [

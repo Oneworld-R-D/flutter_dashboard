@@ -1,7 +1,9 @@
 part of './controllers.dart';
 
-class FlutterDashboardController extends GetxController with GetSingleTickerProviderStateMixin {
-  static FlutterDashboardController get to => Get.put(FlutterDashboardController());
+class FlutterDashboardController extends GetxController
+    with GetSingleTickerProviderStateMixin {
+  static FlutterDashboardController get to =>
+      Get.put(FlutterDashboardController());
 
   final FlutterDashboardNavService _navService = FlutterDashboardNavService.to;
 
@@ -9,16 +11,20 @@ class FlutterDashboardController extends GetxController with GetSingleTickerProv
 
   final RxString currentRoute = ''.obs, currentPageTitle = ''.obs;
 
-  final RxBool isScreenLoading = false.obs, isDrawerOpen = false.obs, isTileExpantionChanged = false.obs;
+  final RxBool isScreenLoading = false.obs,
+      isDrawerOpen = false.obs,
+      isTileExpantionChanged = false.obs;
 
   late AnimationController expansionController;
   late FocusNode focusNode;
 
   final GlobalKey<ScaffoldState> drawerKey = GlobalKey<ScaffoldState>();
 
-  String dashboardInitialRoute = "${DashboardRoutes.DASHBOARD}${FlutterDashboardMaterialApp.of(Get.context!).dashboardItems[0].page!.name}";
+  String dashboardInitialRoute =
+      "${DashboardRoutes.DASHBOARD}${FlutterDashboardMaterialApp.of(Get.context!).dashboardItems[0].page!.name}";
 
-  final RxMap<String, FlutterDashboardItem> finalRoutes = RxMap<String, FlutterDashboardItem>();
+  final RxMap<String, FlutterDashboardItem> finalRoutes =
+      RxMap<String, FlutterDashboardItem>();
 
   FlutterDashboardItem get selectedDrawerItem {
     if (finalRoutes.containsKey(currentPageTitle.value)) {
@@ -55,17 +61,22 @@ class FlutterDashboardController extends GetxController with GetSingleTickerProv
   }
 
   List<FlutterDashboardItem> expandItems(List<FlutterDashboardItem> items) {
-    return items.expand((FlutterDashboardItem element) => element.subItems.isEmpty ? [element] : expandItems(element.subItems)).toList();
+    return items
+        .expand((FlutterDashboardItem element) => element.subItems.isEmpty
+            ? [element]
+            : expandItems(element.subItems))
+        .toList();
   }
 
   @override
   void onInit() {
-    WidgetsBinding.instance?.addPersistentFrameCallback((_) {
-      // print(_navService.finalRoutes);
+    WidgetsBinding.instance.addPersistentFrameCallback((_) {
       _addRoutes(_navService.rawFooterRoutes);
       _addRoutes(_navService.finalRoutes);
-      _addChildrenRoutes(_navService.finalRoutes.map((element) => element.page!).toList());
-      _addChildrenRoutes(_navService.rawFooterRoutes.map((element) => element.page!).toList());
+      _addChildrenRoutes(
+          _navService.finalRoutes.map((element) => element.page!).toList());
+      _addChildrenRoutes(
+          _navService.rawFooterRoutes.map((element) => element.page!).toList());
     });
 
     isScreenLoading(true);
@@ -120,49 +131,66 @@ class FlutterDashboardController extends GetxController with GetSingleTickerProv
     ever(currentRoute, (String location) {
       // String _location = location.split('/').last.toLowerCase();
 
-      if (location.isEmpty || location.split('/').last == 'dashboard' || location == '/' || location == '/index' || location == '/index.html') {
+      if (location.isEmpty ||
+          location.split('/').last == 'dashboard' ||
+          location == '/' ||
+          location == '/index' ||
+          location == '/index.html') {
         currentPageTitle(_navService.rawRoutes.first.title);
       } else {
-        WidgetsBinding.instance?.addPostFrameCallback((_) {
-          _allPagesWithChildrens.map((e) {
-            return location.startsWith(DashboardRoutes.DASHBOARD + e.name);
-          }).toList();
-          // print(_allPagesWithChildrens.firstWhere((element) =>
-          //     location.contains(DashboardRoutes.DASHBOARD + element.name)));
-          if (_allPagesWithChildrens.where((element) => location.startsWith(DashboardRoutes.DASHBOARD + element.name)).isNotEmpty) {
+        if (location != DashboardRoutes.DASHBOARD) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _allPagesWithChildrens.map((e) {
+              return location.startsWith(DashboardRoutes.DASHBOARD + e.name);
+            }).toList();
+            // print(_allPagesWithChildrens.firstWhere((element) =>
+            //     location.contains(DashboardRoutes.DASHBOARD + element.name)));
             if (_allPagesWithChildrens
-                .firstWhere((element) => location.startsWith(DashboardRoutes.DASHBOARD + element.name))
-                .name
-                .contains(location.split('/').last)) {
-              currentPageTitle(finalRoutes.entries
-                  .toList()
-                  .firstWhere((element) =>
-                      element.value.page!.name ==
-                      _allPagesWithChildrens.firstWhere((element) => location.startsWith(DashboardRoutes.DASHBOARD + element.name)).name)
-                  .value
-                  .title);
-            } else {
-              // Need to check later
-              if (_allPagesWithChildrens.any((element) => element.name == '/${location.split('/').last}')) {
+                .where((element) => location
+                    .startsWith(DashboardRoutes.DASHBOARD + element.name))
+                .isNotEmpty) {
+              if (_allPagesWithChildrens
+                  .firstWhere((element) => location
+                      .startsWith(DashboardRoutes.DASHBOARD + element.name))
+                  .name
+                  .contains(location.split('/').last)) {
                 currentPageTitle(finalRoutes.entries
                     .toList()
                     .firstWhere((element) =>
                         element.value.page!.name ==
-                        _allPagesWithChildrens.firstWhere((element) => location.startsWith(DashboardRoutes.DASHBOARD + element.name)).name)
+                        _allPagesWithChildrens
+                            .firstWhere((element) => location.startsWith(
+                                DashboardRoutes.DASHBOARD + element.name))
+                            .name)
                     .value
                     .title);
               } else {
-                currentPageTitle("404");
-                delegate?.toNamed(DashboardRoutes.ERROR404);
+                // Need to check later
+                if (_allPagesWithChildrens.any((element) =>
+                    element.name == '/${location.split('/').last}')) {
+                  currentPageTitle(finalRoutes.entries
+                      .toList()
+                      .firstWhere((element) =>
+                          element.value.page!.name ==
+                          _allPagesWithChildrens
+                              .firstWhere((element) => location.startsWith(
+                                  DashboardRoutes.DASHBOARD + element.name))
+                              .name)
+                      .value
+                      .title);
+                } else {
+                  currentPageTitle("404");
+                  delegate?.toNamed(DashboardRoutes.ERROR404);
+                }
               }
+            } else {
+              currentPageTitle("404");
+              delegate?.toNamed(DashboardRoutes.ERROR404);
             }
-          } else {
-            currentPageTitle("404");
-            delegate?.toNamed(DashboardRoutes.ERROR404);
-          }
 
-          Get.log('Current dashboard route : ${currentPageTitle.value}');
-        });
+            Get.log('Current dashboard route : ${currentPageTitle.value}');
+          });
+        }
 
         // _location.startsWith(pattern);
         // WidgetsBinding.instance?.addPostFrameCallback((_) {

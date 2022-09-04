@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dashboard/flutter_dashboard.dart';
+import 'package:get/get.dart';
 
 class FlutterDashboardMaterialApp<T> extends StatefulWidget {
   final String title;
@@ -101,11 +102,12 @@ class _FlutterDashboardMaterialAppState<T>
       initialBinding: BindingsBuilder(
         () {
           Get.put(
-              FlutterDashboardNavService(
-                navItems: widget.dashboardItems,
-                navFooterItems: widget.drawerOptions.footerNavItems,
-              ),
-              permanent: true);
+            FlutterDashboardNavService(
+              navItems: widget.dashboardItems,
+              navFooterItems: widget.drawerOptions.footerNavItems,
+            ),
+            permanent: true,
+          );
           if ((widget.rootControllers ?? []).isNotEmpty) {
             for (var _controller in (widget.rootControllers ?? [])) {
               _controller;
